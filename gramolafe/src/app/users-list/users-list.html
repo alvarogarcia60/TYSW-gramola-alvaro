@@ -1,0 +1,8 @@
+<div>
+  <h2>Listado de usuarios</h2>
+  <button (click)="load()">Cargar</button>
+  <ul>
+    <li *ngFor="let u of users">{{ u.id }} — {{ u.email }}</li>
+  </ul>
+  <p *ngIf="err" style="color:red">{{ err }}</p>
+</div>

@@ -1,0 +1,11 @@
+<div>
+  <h2>Login</h2>
+  <label>Email</label>
+  <input type="email" [(ngModel)]="email" name="email">
+  <label>Password</label>
+  <input type="password" [(ngModel)]="password" name="password">
+  <button (click)="doLogin()">Entrar</button>
+
+  <p *ngIf="ok" style="color:green">{{ ok }}</p>
+  <p *ngIf="err" style="color:red">{{ err }}</p>
+</div>

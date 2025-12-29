@@ -1,0 +1,17 @@
+<div>
+  <label for="email">Email:</label>
+  <input type="email" [(ngModel)]="email" name="email">
+
+  <label for="password">Contraseña:</label>
+  <input type="password" [(ngModel)]="pwd1" name="password">
+
+  <label for="confirmPassword">Confirmar Contraseña:</label>
+  <input type="password" [(ngModel)]="pwd2" name="confirmPassword">
+
+  <button (click)="registrar()">Registrar</button>
+
+  <p *ngIf="msgOk" style="color:green">{{ msgOk }}</p>
+  <p *ngIf="msgErr" style="color:red">{{ msgErr }}</p>
+  <span *ngIf="registroOk"> Registro realizado con éxito, hemos enviado un correo de confirmación.</span>
+  <span *ngIf="registroKo"> Error en el registro, inténtalo de nuevo.</span>
+</div>
