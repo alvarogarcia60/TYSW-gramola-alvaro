@@ -1,21 +1,13 @@
 import { Component } from '@angular/core';
-import { RegisterComponent } from './register/register';
-import { LoginComponent } from './login/login';
-import { UsersListComponent } from './users-list/users-list';
-import { UserDetailComponent } from './user-detail/user-detail';
-import { UserDeleteComponent } from './user-delete/user-delete';
+import { RouterOutlet } from '@angular/router'; // IMPORTANTE: Añade esta línea
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [
-    RegisterComponent,
-    LoginComponent,
-    UsersListComponent,
-    UserDetailComponent,
-    UserDeleteComponent
-  ],
+  imports: [RouterOutlet], // IMPORTANTE: Añádelo a los imports
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {}
+export class AppComponent {
+  title = 'gramolafe';
+}

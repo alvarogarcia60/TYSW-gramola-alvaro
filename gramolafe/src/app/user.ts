@@ -1,37 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class UserService {
-  // Si usas proxy, usa '/users' en lugar de 'http://localhost:8080/users'
-  private baseUrl = 'http://localhost:8080/users';
 
-  constructor(private http: HttpClient) {}
+  private url = "http://localhost:8080/users";
 
-  // ya tenías:
-  register(email: string, pwd1: string, pwd2: string) {
-    return this.http.post<any>(`${this.baseUrl}/register`, { email, pwd1, pwd2 });
+  constructor(private http: HttpClient) { }
+
+  register(bar: string, email: string, pwd1: string, pwd2: string, clientId: string, clientSecret: string): Observable<any> {
+    const body = { bar, email, pwd1, pwd2, clientId, clientSecret };
+    return this.http.post(`${this.url}/register`, body);
   }
 
-  // NUEVOS ACCESOS
-  login(email: string, password: string) {
-    return this.http.post<any>(`${this.baseUrl}/login`, { email, password });
+  login(email: string, pwd1: string): Observable<any> {
+    return this.http.post(`${this.url}/login`, { email, pwd1 });
   }
 
-  getAll() {
-    return this.http.get<any[]>(`${this.baseUrl}`);
+  getAll(): Observable<any> {
+    return this.http.get(`${this.url}/getAll`);
   }
 
-  getById(id: number) {
-    return this.http.get<any>(`${this.baseUrl}/${id}`);
+  // Cambiado a 'any' para evitar conflictos entre number y string
+  getById(id: any): Observable<any> {
+    return this.http.get(`${this.url}/getById/${id}`);
   }
 
-  update(user: any) {
-    // Ajusta el esquema según tu backend
-    return this.http.put<any>(`${this.baseUrl}/${user.id}`, user);
-  }
-
-  delete(id: number) {
-    return this.http.delete<any>(`${this.baseUrl}/${id}`);
+  // Cambiado a 'any' para evitar conflictos entre number y string
+  delete(id: any): Observable<any> {
+    return this.http.delete(`${this.url}/delete/${id}`);
   }
 }

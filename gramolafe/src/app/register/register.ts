@@ -2,50 +2,58 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../user';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, FormsModule],  
+  imports: [CommonModule, FormsModule],
   templateUrl: './register.html',
-  styleUrls: ['./register.css']
+  styleUrl: './register.css'
 })
 export class RegisterComponent {
-  email?: string;
-  pwd1?: string;
-  pwd2?: string;
-  registroOk:boolean = false;
-  registroKo:boolean = false;
+  // Variables vinculadas al formulario
+  email = ''; 
+  pwd1 = ''; 
+  pwd2 = '';
+  bar = '';          // Nuevo: necesario para tu UserController
+  clientId = '';     // Nuevo: necesario para tu UserController
+  clientSecret = ''; // Nuevo: necesario para tu UserController
 
-  msgOk = '';
+  // Variables de estado
+  msgOk = ''; 
   msgErr = '';
+  registroOk = false; 
+  registroKo = false;
 
-  constructor(private service: UserService) {}
+  constructor(private users: UserService, private router: Router) {}
 
   registrar() {
-    this.msgOk = '';
-    this.msgErr = '';
-    this.registroOk = false;
-    this.registroKo = false;
+    this.msgOk = this.msgErr = '';
+    this.registroOk = this.registroKo = false;
 
-    if (!this.email || !this.pwd1 || !this.pwd2) {
-      this.msgErr = 'Rellena todos los campos';
-      return;
-    }
-    if (this.pwd1 !== this.pwd2) {
-      this.msgErr = 'Las contraseñas no coinciden';
-      return;
+    // Validación básica de contraseñas
+    if (this.pwd1 !== this.pwd2) { 
+      this.msgErr = 'Las contraseñas no coinciden'; 
+      return; 
     }
 
-    this.service
-      .register(this.email, this.pwd1, this.pwd2)
-      .subscribe({
-        next: () => (this.msgOk = 'Registro exitoso ✅'),
-        error: () => {
-          this.msgErr = 'Error en el registro ❌';
-          this.registroKo = true;
-        },
-        complete: () => (this.registroOk = true)
-      });
+    // Llamada al servicio enviando todos los datos que pide el Backend
+    // Asegúrate de que tu UserService.register acepte estos nuevos parámetros
+    this.users.register(this.bar, this.email, this.pwd1, this.pwd2, this.clientId, this.clientSecret).subscribe({
+      next: () => { 
+        this.registroOk = true; 
+        this.msgOk = 'Registro OK. Revisa el link en la terminal de Java.'; 
+      },
+      error: (e) => { 
+        this.registroKo = true; 
+        this.msgErr = e?.error?.message || 'Error en el registro'; 
+      }
+    });
+  }
+
+  // Método para volver al login (soluciona el error que tenías)
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 }

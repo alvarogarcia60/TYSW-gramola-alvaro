@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../user';
+import { Router } from '@angular/router'; // 1. Importamos el Router
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,7 @@ export class LoginComponent {
   ok = '';
   err = '';
 
-  constructor(private users: UserService) {}
+  constructor(private users: UserService, private router: Router) {} // 2. Inyectamos el Router
 
   doLogin() {
     this.ok = this.err = '';
@@ -25,5 +26,10 @@ export class LoginComponent {
       next: r => this.ok = 'Login correcto ✅',
       error: e => this.err = e?.error?.message || 'Login fallido ❌'
     });
+  }
+
+  // 3. Método para ir al registro
+  goToRegister() {
+    this.router.navigate(['/register']);
   }
 }

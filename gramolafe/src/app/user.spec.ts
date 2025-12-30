@@ -1,16 +1,23 @@
-import { TestBed } from '@angular/core/testing';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
-import { User } from './user';
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
 
-describe('User', () => {
-  let service: User;
+  constructor(private http: HttpClient) { }
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(User);
-  });
-
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
-});
+  // Asegúrate de que esta firma tenga los 6 parámetros
+  register(bar: string, email: string, pwd1: string, pwd2: string, clientId: string, clientSecret: string) {
+    const body = {
+      bar: bar,
+      email: email,
+      pwd1: pwd1,
+      pwd2: pwd2,
+      clientId: clientId,
+      clientSecret: clientSecret
+    };
+    return this.http.post("http://localhost:8080/users/register", body);
+  }
+}
