@@ -68,4 +68,25 @@ input {
 .msg-ok { color: #1db954; font-weight: bold; }
 .msg-err { color: #e74c3c; font-weight: bold; }
 
+.forgot-password-link {
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #1db954;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0;
+  transition: color 0.3s ease;
+}
+
+.link-button:hover {
+  color: #1aa34a;
+}
+
 hr { margin: 1.5rem 0; border: 0; border-top: 1px solid #eee; }

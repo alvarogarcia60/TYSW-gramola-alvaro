@@ -86,4 +86,46 @@ public class UserController {
         response.put("message", saved ? "Token saved successfully" : "Failed to save token");
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        Map<String, String> response = new java.util.HashMap<>();
+        
+        if (email == null || email.trim().isEmpty()) {
+            response.put("message", "Email es requerido");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        service.forgotPassword(email);
+        response.put("message", "Si el email existe en nuestro sistema, recibirás un enlace para recuperar tu contraseña");
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/resetPassword")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
+        
+        Map<String, String> response = new java.util.HashMap<>();
+        
+        if (email == null || token == null || newPassword == null || newPassword.trim().isEmpty()) {
+            response.put("success", "false");
+            response.put("message", "Faltan parámetros requeridos");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        boolean success = service.resetPassword(email, token, newPassword);
+        
+        if (success) {
+            response.put("success", "true");
+            response.put("message", "Contraseña cambiada exitosamente");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("success", "false");
+            response.put("message", "Token inválido o expirado");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
 }

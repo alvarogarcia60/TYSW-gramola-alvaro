@@ -2,10 +2,10 @@ package edu.uclm.es.gramola.services;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
 import edu.uclm.es.gramola.dao.StripeTransactionDao;
 import edu.uclm.es.gramola.dao.TokenDao;
 import edu.uclm.es.gramola.dao.UserDao;
@@ -162,5 +163,86 @@ public class UserService {
             System.err.println("❌ Error OAuth: " + e.getMessage());
             return false;
         }
+    }
+
+    // RECUPERAR CONTRASEÑA: Envía email con token para resetear contraseña
+    public void forgotPassword(String email) {
+        User user = userRepo.findById(email).orElse(null);
+        if (user == null) {
+            // Por seguridad, no decimos si el email existe o no
+            System.out.println("⚠️ Intento de recuperación para email no registrado: " + email);
+            return;
+        }
+
+        Token resetToken = new Token();
+        resetToken.setId(UUID.randomUUID().toString());
+        resetToken.setCreationTime(System.currentTimeMillis());
+        tokenRepo.save(resetToken);
+
+        String urlReset = "http://127.0.0.1:4200/reset-password?email=" + email + "&token=" + resetToken.getId();
+
+        System.out.println("------------------------------------------------------------");
+        System.out.println("🔐 ENLACE DE RECUPERACIÓN PARA: " + email);
+        System.out.println(urlReset);
+        System.out.println("------------------------------------------------------------");
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("algarcimartinez@gmail.com");
+            message.setTo(email);
+            message.setSubject("Recupera tu contraseña en La Gramola");
+            message.setText("Haz clic aquí para cambiar tu contraseña: " + urlReset + "\n\n" +
+                           "Este enlace expira en 24 horas.\n" +
+                           "Si no solicitaste esto, ignora este correo.");
+            mailSender.send(message);
+            System.out.println("✅ Email de recuperación enviado a: " + email);
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar email de recuperación: " + e.getMessage());
+        }
+    }
+
+    // Cambiar contraseña con token válido
+    public boolean resetPassword(String email, String token, String newPassword) {
+        User user = userRepo.findById(email).orElse(null);
+        if (user == null) {
+            System.err.println("❌ Usuario no encontrado: " + email);
+            return false;
+        }
+
+        Token resetToken = null;
+        try {
+            resetToken = tokenRepo.findById(token).orElse(null);
+        } catch (Exception e) {
+            System.err.println("❌ Token inválido: " + token);
+            return false;
+        }
+
+        if (resetToken == null) {
+            System.err.println("❌ Token no encontrado: " + token);
+            return false;
+        }
+
+        // Verificar que el token no haya expirado (24 horas = 86400000 ms)
+        long tokenAge = System.currentTimeMillis() - resetToken.getCreationTime();
+        if (tokenAge > 86400000L) {
+            System.err.println("❌ Token expirado para: " + email);
+            return false;
+        }
+
+        // Verificar que el token no haya sido usado antes
+        if (resetToken.isUsed()) {
+            System.err.println("❌ Token ya fue usado: " + token);
+            return false;
+        }
+
+        // Cambiar contraseña y marcar token como usado
+        user.setPwd(newPassword);
+        resetToken.use();
+
+        userRepo.save(user);
+        tokenRepo.save(resetToken);
+
+        System.out.println("✅ Contraseña cambiada para: " + email);
+        return true;
     }
 }
