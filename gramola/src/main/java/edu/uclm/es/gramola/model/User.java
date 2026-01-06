@@ -1,9 +1,14 @@
 package edu.uclm.es.gramola.model;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
@@ -13,19 +18,37 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
     @Id
     private String email;
     private String bar;
     private String pwd;
+
+    @Column(name = "client_id")
     private String clientId;
+
+    @Column(name = "client_secret")
     private String clientSecret;
 
+    // Campo crítico para el Flujo 2 de OAuth 2.0 (Acceso a recursos)
+    @Column(name = "spoti_simple_token", columnDefinition = "TEXT")
+    private String spotiSimpleToken;
+
+    private boolean paid;
+
+    @Column(name = "expiration_date")
+    private long expirationDate;
+
+    private boolean playing;
+
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "creation_token_id", referencedColumnName = "id")
     private Token creationToken;
 
-    // Getters y Setters
+    // --- GETTERS Y SETTERS ---
+
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     
@@ -41,13 +64,29 @@ public class User {
     public String getClientSecret() { return clientSecret; }
     public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
 
+    // Getter y Setter para el token de Spotify (Soluciona errores de compilación)
+    public String getSpotiSimpleToken() { return spotiSimpleToken; }
+    public void setSpotiSimpleToken(String spotiSimpleToken) { this.spotiSimpleToken = spotiSimpleToken; }
+
+    public boolean isPaid() { return paid; }
+    public void setPaid(boolean paid) { this.paid = paid; }
+
+    public long getExpirationDate() { return expirationDate; }
+    public void setExpirationDate(long expirationDate) { this.expirationDate = expirationDate; }
+
+    public boolean isPlaying() { return playing; }
+    public void setPlaying(boolean playing) { this.playing = playing; }
+
     public Token getCreationToken() { return creationToken; }
     public void setCreationToken(Token creationToken) { this.creationToken = creationToken; }
 
+    // --- LÓGICA DE NEGOCIO ---
+
     public String encryptPassword(String password) {
+        if (password == null) return null;
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(password.getBytes());
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);

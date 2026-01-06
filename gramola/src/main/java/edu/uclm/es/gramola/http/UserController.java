@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,45 +13,77 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.es.gramola.dao.UserDao;
+import edu.uclm.es.gramola.model.User;
 import edu.uclm.es.gramola.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("users")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = { "http://localhost:4200", "http://127.0.0.1:4200" })
 public class UserController {
 
-    @Autowired
-    private UserService service;
+    @Autowired private UserService service;
+    @Autowired private UserDao userRepo;
 
     @PostMapping("/register")
     public void register(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String pwd1 = body.get("pwd1");
-        String pwd2 = body.get("pwd2");
-        String bar = body.get("bar");
-        String clientId = body.get("clientId");
-        String clientSecret = body.get("clientSecret");
-
-        // Validaciones obligatorias
-        if (email == null || pwd1 == null || bar == null || clientId == null || clientSecret == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Faltan datos");
-
-        if (!pwd1.equals(pwd2))
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Las contraseñas no coinciden");
-
-        this.service.register(bar, email, pwd1, clientId, clientSecret);
+        service.register(body.get("bar"), body.get("email"), body.get("pwd1"), 
+                         body.get("clientId"), body.get("clientSecret"));
     }
 
     @GetMapping("/confirmToken/{email}")
     public void confirmToken(@PathVariable String email, @RequestParam String token, HttpServletResponse response) throws IOException {
-        // Valida el token (si no es válido, tu servicio debería lanzar una excepción)
-        this.service.confirmToken(email, token);
+        service.confirmToken(email, token);
+        // Ayer usábamos 127.0.0.1 para que Spotify y Stripe no fallaran
+        response.sendRedirect("http://127.0.0.1:4200/payment?token=" + token + "&email=" + email);
+    }
 
-        // Redirigimos al puerto 4200 (Angular)
-        // Pasamos ambos parámetros para facilitar la vida al componente de pago
-        response.sendRedirect("http://localhost:4200/payment?token=" + token + "&email=" + email);
+    @PostMapping("/pay")
+    public void pay(@RequestBody Map<String, Object> data) {
+        service.saveStripeTransaction((String) data.get("email"), data);
+    }
+
+    @PostMapping("/login")
+    public User login(@RequestBody Map<String, String> body) {
+        return service.login(body.get("email"), body.get("password"));
+    }
+
+    @GetMapping("/loginSpotify")
+    public void loginSpotify(HttpServletResponse response, @RequestParam String email) throws IOException {
+        User user = userRepo.findById(email).orElseThrow();
+        String redirectUri = "http://127.0.0.1:4200/callback";
+        String scopes = "user-read-private user-read-email playlist-read-private user-read-playback-state user-modify-playback-state user-read-currently-playing streaming";
+        
+        String url = "https://accounts.spotify.com/authorize" +
+                     "?response_type=code" +
+                     "&client_id=" + user.getClientId() +
+                     "&scope=" + java.net.URLEncoder.encode(scopes, "UTF-8") +
+                     "&redirect_uri=" + java.net.URLEncoder.encode(redirectUri, "UTF-8") +
+                     "&state=" + email;
+        response.sendRedirect(url);
+    }
+
+    @GetMapping("/spotifyCallback")
+    public ResponseEntity<Map<String, Object>> spotifyCallback(
+            @RequestParam(required = false) String code, 
+            @RequestParam(required = false) String email) {
+        
+        System.out.println("🔍 Callback recibido - code: " + (code != null ? "presente" : "null") + ", email: " + email);
+        
+        Map<String, Object> response = new java.util.HashMap<>();
+        
+        if (code == null || email == null) {
+            System.err.println("❌ Faltan parámetros en el callback - code: " + code + ", email: " + email);
+            response.put("success", false);
+            response.put("message", "Missing parameters");
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        boolean saved = service.getAuthorizationToken(code, email);
+        response.put("success", saved);
+        response.put("message", saved ? "Token saved successfully" : "Failed to save token");
+        return ResponseEntity.ok(response);
     }
 }

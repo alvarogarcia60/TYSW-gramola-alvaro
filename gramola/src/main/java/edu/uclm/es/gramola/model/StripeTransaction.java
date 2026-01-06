@@ -7,16 +7,16 @@ import jakarta.persistence.Lob;
 
 @Entity
 public class StripeTransaction {
+
     @Id
-    private String id; // El ID que nos da Stripe (pi_...)
+    private String id;
 
     @Lob
     @Column(columnDefinition = "LONGTEXT")
-    private String data; // Guardaremos el JSON completo de la transacción
+    private String data;
 
-    private String email; // Email del bar que realiza el pago
+    private String email;
 
-    // Getters y Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 

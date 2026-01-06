@@ -1,8 +1,70 @@
-<div>
-  <h2>Listado de usuarios</h2>
-  <button (click)="load()">Cargar</button>
-  <ul>
-    <li *ngFor="let u of users">{{ u.id }} — {{ u.email }}</li>
-  </ul>
-  <p *ngIf="err" style="color:red">{{ err }}</p>
+<div class="dashboard-container">
+  <header class="dashboard-header">
+    <div class="header-text">
+      <h1>Panel de Administración</h1>
+      <p class="subtitle">Gestiona los bares registrados en La Gramola</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-music" routerLink="/search-songs">
+        <span class="icon">🎵</span> Ir al Buscador
+      </button>
+      
+      <button class="btn-refresh" (click)="load()">
+        <span class="icon">🔄</span> Actualizar Datos
+      </button>
+      <button class="btn-logout" (click)="logout()">
+        <span class="icon">🚪</span> Cerrar Sesión
+      </button>
+    </div>
+  </header>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total de Bares</span>
+      <span class="stat-value">{{ bares.length }}</span>
+      <div class="stat-indicator green"></div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Estado del Sistema</span>
+      <span class="stat-value">Activo</span>
+      <div class="stat-indicator green"></div>
+    </div>
+    <div class="stat-card action-card" (click)="goToPayment()">
+      <span class="stat-label">Suscripción</span>
+      <span class="stat-value highlight">Pagar ahora</span>
+      <p class="stat-desc">Finaliza tu registro con Stripe</p>
+    </div>
+  </div>
+
+  <div class="table-section">
+    <div class="table-header">
+      <h3>Directorio de Establecimientos</h3>
+    </div>
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Nombre del Establecimiento</th>
+          <th>Correo Electrónico</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of bares">
+          <td class="bar-name">
+            <span class="bar-icon">🏢</span> {{ u.bar }}
+          </td>
+          <td>{{ u.email }}</td>
+          <td>
+            <span [class]="u.paid ? 'badge badge-success' : 'badge badge-danger'">
+              {{ u.paid ? 'Suscrito' : 'Pendiente de Pago' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="err" class="error-banner">
+    <span class="icon">⚠️</span> {{ err }}
+  </div>
 </div>

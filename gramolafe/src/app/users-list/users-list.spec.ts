@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { UsersListComponent } from './users-list'; // Nombre corregido
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { UsersList } from './users-list';
-
-describe('UsersList', () => {
-  let component: UsersList;
-  let fixture: ComponentFixture<UsersList>;
+describe('UsersListComponent', () => {
+  let component: UsersListComponent;
+  let fixture: ComponentFixture<UsersListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UsersList]
+      imports: [UsersListComponent, HttpClientTestingModule]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UsersList);
+    fixture = TestBed.createComponent(UsersListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

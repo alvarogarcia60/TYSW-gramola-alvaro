@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class UserService {
 
-  private url = "http://localhost:8080/users";
+  // CAMBIO CLAVE: Usamos 127.0.0.1 para que coincida con el host del navegador
+  private url = "http://127.0.0.1:8080/users";
 
   constructor(private http: HttpClient) { }
 
@@ -16,20 +17,27 @@ export class UserService {
     return this.http.post(`${this.url}/register`, body);
   }
 
-  login(email: string, pwd1: string): Observable<any> {
-    return this.http.post(`${this.url}/login`, { email, pwd1 });
+  login(email: string, password: string): Observable<any> {
+    // CAMBIO CLAVE: También aquí usamos la IP exacta
+    const loginUrl = "http://127.0.0.1:8080/users/login";
+    
+    const datos = {
+      email: email,
+      password: password
+    };
+
+    console.log("Servicio Angular enviando a 127.0.0.1:", datos);
+    return this.http.post(loginUrl, datos);
   }
 
   getAll(): Observable<any> {
     return this.http.get(`${this.url}/getAll`);
   }
 
-  // Cambiado a 'any' para evitar conflictos entre number y string
   getById(id: any): Observable<any> {
     return this.http.get(`${this.url}/getById/${id}`);
   }
-
-  // Cambiado a 'any' para evitar conflictos entre number y string
+  
   delete(id: any): Observable<any> {
     return this.http.delete(`${this.url}/delete/${id}`);
   }
