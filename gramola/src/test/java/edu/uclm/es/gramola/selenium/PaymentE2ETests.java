@@ -37,6 +37,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 /**
  * Pruebas E2E Selenium – Sección 4 (cliente del bar)
  */
+@SuppressWarnings("unused") // Los métodos @BeforeAll, @BeforeEach, @AfterAll son usados por JUnit
 public class PaymentE2ETests {
 
     private static final String BAR_EMAIL = "algarcimartinez@gmail.com";
@@ -120,7 +121,7 @@ public class PaymentE2ETests {
         List<Map<String, Object>> playlist = fetchPlaylist();
         int expectedPosition = playlistSizeBefore + 1;
         boolean inQueue = playlist.stream().anyMatch(p -> songTitle.equalsIgnoreCase(String.valueOf(p.get("title")))
-            && Integer.valueOf(String.valueOf(p.get("queuePosition"))) == expectedPosition);
+            && Integer.parseInt(p.get("queuePosition").toString()) == expectedPosition);
         assertTrue(inQueue, "La canción no aparece en la posición esperada de la cola");
     }
 

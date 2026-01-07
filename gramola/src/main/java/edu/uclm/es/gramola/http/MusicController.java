@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.uclm.es.gramola.model.Playlist;
 import edu.uclm.es.gramola.services.MusicService;
 
 @RestController
@@ -32,13 +31,30 @@ public class MusicController {
     }
 
     @GetMapping("/getPlaylist")
-    public List<Playlist> getMyPlaylist(@RequestParam String email) {
-        return this.musicService.getMyPlaylist(email);
+    public ResponseEntity<?> getMyPlaylist(@RequestParam String email) {
+        // Verificar suscripción activa
+        Map<String, Object> subscription = this.musicService.checkSubscription(email);
+        if (!(Boolean) subscription.get("active")) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Suscripción expirada");
+            error.put("message", "Tu suscripción ha expirado. Por favor renueva tu suscripción para continuar.");
+            return ResponseEntity.status(403).body(error);
+        }
+        return ResponseEntity.ok(this.musicService.getMyPlaylist(email));
     }
 
     @PostMapping("/add")
-    public void add(@RequestBody Map<String, Object> songData, @RequestParam String email) {
+    public ResponseEntity<?> add(@RequestBody Map<String, Object> songData, @RequestParam String email) {
+        // Verificar suscripción activa para el dueño del bar
+        Map<String, Object> subscription = this.musicService.checkSubscription(email);
+        if (!(Boolean) subscription.get("active")) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Suscripción expirada");
+            error.put("message", "La suscripción del bar ha expirado. El propietario debe renovarla.");
+            return ResponseEntity.status(403).body(error);
+        }
         this.musicService.addSong(songData, email);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/add-paid")
@@ -57,6 +73,7 @@ public class MusicController {
             return ResponseEntity.badRequest().body(resp);
         }
 
+        @SuppressWarnings("unchecked")
         boolean ok = this.musicService.addSongPaid((Map<String, Object>) songDataObj, email, paymentIntentId);
         if (ok) {
             System.out.println("✅ Canción añadida exitosamente");
@@ -84,5 +101,38 @@ public class MusicController {
     @GetMapping("/playback-state")
     public Map<String, Object> getPlaybackState(@RequestParam String email) {
         return this.musicService.getPlaybackState(email);
+    }
+
+    @PostMapping("/play")
+    public ResponseEntity<Map<String, String>> play(@RequestParam String email) {
+        boolean ok = this.musicService.play(email);
+        Map<String, String> resp = new HashMap<>();
+        resp.put("success", String.valueOf(ok));
+        resp.put("message", ok ? "Reproducción iniciada" : "Error al iniciar reproducción");
+        return ok ? ResponseEntity.ok(resp) : ResponseEntity.badRequest().body(resp);
+    }
+
+    @PostMapping("/pause")
+    public ResponseEntity<Map<String, String>> pause(@RequestParam String email) {
+        boolean ok = this.musicService.pause(email);
+        Map<String, String> resp = new HashMap<>();
+        resp.put("success", String.valueOf(ok));
+        resp.put("message", ok ? "Reproducción pausada" : "Error al pausar reproducción");
+        return ok ? ResponseEntity.ok(resp) : ResponseEntity.badRequest().body(resp);
+    }
+
+    @PostMapping("/select-device")
+    public ResponseEntity<Map<String, String>> selectDevice(@RequestParam String email, @RequestParam String deviceId) {
+        boolean ok = this.musicService.selectDevice(email, deviceId);
+        Map<String, String> resp = new HashMap<>();
+        resp.put("success", String.valueOf(ok));
+        resp.put("message", ok ? "Dispositivo seleccionado" : "Error al seleccionar dispositivo");
+        return ok ? ResponseEntity.ok(resp) : ResponseEntity.badRequest().body(resp);
+    }
+
+    @GetMapping("/check-subscription")
+    public ResponseEntity<Map<String, Object>> checkSubscription(@RequestParam String email) {
+        Map<String, Object> result = this.musicService.checkSubscription(email);
+        return ResponseEntity.ok(result);
     }
 }

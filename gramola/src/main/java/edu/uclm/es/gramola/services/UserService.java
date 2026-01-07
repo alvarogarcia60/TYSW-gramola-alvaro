@@ -2,6 +2,7 @@ package edu.uclm.es.gramola.services;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -148,7 +149,7 @@ public class UserService {
             String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
             headers.set("Authorization", "Basic " + encodedAuth);
 
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, new HttpEntity<>(form, headers), Map.class);
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>)(ResponseEntity<?>)restTemplate.postForEntity(url, new HttpEntity<>(form, headers), Map.class);
             Map<String, Object> body = response.getBody();
             if (body != null && body.containsKey("access_token")) {
                 user.setSpotiSimpleToken(body.get("access_token").toString());
@@ -209,7 +210,7 @@ public class UserService {
             return false;
         }
 
-        Token resetToken = null;
+        Token resetToken;
         try {
             resetToken = tokenRepo.findById(token).orElse(null);
         } catch (Exception e) {
@@ -244,5 +245,35 @@ public class UserService {
 
         System.out.println("✅ Contraseña cambiada para: " + email);
         return true;
+    }
+
+    // Obtener historial de transacciones del usuario
+    public List<StripeTransaction> getTransactionHistory(String email) {
+        return stripeRepo.findByEmailOrderByIdDesc(email);
+    }
+
+    // Obtener estado de suscripción del usuario
+    public Map<String, Object> getSubscriptionStatus(String email) {
+        Map<String, Object> status = new java.util.HashMap<>();
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            long now = System.currentTimeMillis();
+            long expirationDate = user.getExpirationDate();
+            
+            boolean isActive = user.isPaid() && expirationDate > now;
+            long daysRemaining = isActive ? (expirationDate - now) / (1000 * 60 * 60 * 24) : 0;
+            
+            status.put("email", email);
+            status.put("bar", user.getBar());
+            status.put("isPaid", user.isPaid());
+            status.put("active", isActive);
+            status.put("expirationDate", expirationDate);
+            status.put("daysRemaining", daysRemaining);
+            
+            return status;
+        } catch (Exception e) {
+            status.put("error", "Usuario no encontrado");
+            return status;
+        }
     }
 }

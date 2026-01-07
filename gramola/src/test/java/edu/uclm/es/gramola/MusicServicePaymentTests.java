@@ -20,6 +20,7 @@ import edu.uclm.es.gramola.services.MusicService;
 
 @SpringBootTest
 @Transactional
+@SuppressWarnings("unused") // El método @BeforeEach es usado por JUnit
 public class MusicServicePaymentTests {
 
     @Autowired private MusicService musicService;

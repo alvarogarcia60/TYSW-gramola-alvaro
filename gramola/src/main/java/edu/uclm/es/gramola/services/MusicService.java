@@ -107,9 +107,9 @@ public class MusicService {
         System.out.println("🗑️ Canción con ID " + id + " eliminada de la playlist.");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     public List<Map<String, Object>> search(String texto, String email) {
-        String token = "";
+        String token;
         try {
             if (email != null) {
                 User user = userRepo.findById(email).orElse(null);
@@ -130,8 +130,8 @@ public class MusicService {
         headers.setBearerAuth(token);
         
         try {
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-            Map body = response.getBody();
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>)(ResponseEntity<?>)restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+            Map<String, Object> body = response.getBody();
             if (body == null || !body.containsKey("tracks")) return new ArrayList<>();
             Map<String, Object> tracks = (Map<String, Object>) body.get("tracks");
             return (List<Map<String, Object>>) tracks.get("items");
@@ -142,7 +142,7 @@ public class MusicService {
         return this.playlistRepo.findByBarEmailOrderByQueuePositionAsc(Objects.requireNonNull(email));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     private String getAccessToken(String clientId, String clientSecret) {
         String url = "https://accounts.spotify.com/api/token";
         HttpHeaders headers = new HttpHeaders();
@@ -153,8 +153,8 @@ public class MusicService {
         params.add("grant_type", "client_credentials");
         
         try {
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, new HttpEntity<>(params, headers), Map.class);
-            Map body = response.getBody();
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>)(ResponseEntity<?>)restTemplate.postForEntity(url, new HttpEntity<>(params, headers), Map.class);
+            Map<String, Object> body = response.getBody();
             return (body != null) ? Objects.toString(body.get("access_token"), "") : "";
         } catch (Exception e) { return ""; }
     }
@@ -170,8 +170,8 @@ public class MusicService {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(userToken);
             
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-            Map<String, Object> body = (Map<String, Object>) response.getBody();
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>)(ResponseEntity<?>)restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+            Map<String, Object> body = response.getBody();
             return (body != null) ? (List<Map<String, Object>>) body.get("devices") : new ArrayList<>();
         } catch (Exception e) { return new ArrayList<>(); }
     }
@@ -187,8 +187,8 @@ public class MusicService {
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(userToken);
             
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-            Map<String, Object> body = (Map<String, Object>) response.getBody();
+            ResponseEntity<Map<String, Object>> response = (ResponseEntity<Map<String, Object>>)(ResponseEntity<?>)restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+            Map<String, Object> body = response.getBody();
             return body != null ? body : new HashMap<>();
         } catch (Exception e) { return new HashMap<>(); }
     }
@@ -212,17 +212,104 @@ public class MusicService {
             PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
             System.out.println("✅ PaymentIntent recuperado. Estado: " + intent.getStatus());
             
-            if (intent != null && "succeeded".equalsIgnoreCase(intent.getStatus())) {
+            if ("succeeded".equalsIgnoreCase(intent.getStatus())) {
                 System.out.println("💳 Pago verificado. Añadiendo canción...");
                 addSong(songData, email);
                 return true;
             }
-            System.err.println("❌ Pago no completado. Estado: " + (intent != null ? intent.getStatus() : "null"));
+            System.err.println("❌ Pago no completado. Estado: " + intent.getStatus());
             return false;
         } catch (Exception e) {
             System.err.println("❌ Error verificando pago: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-            e.printStackTrace();
             return false;
+        }
+    }
+
+    // Control de reproductor
+    public boolean play(String email) {
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            String userToken = user.getSpotiSimpleToken();
+            if (userToken == null) return false;
+
+            String url = "https://api.spotify.com/v1/me/player/play";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(userToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            restTemplate.put(url, new HttpEntity<>(headers), String.class);
+            user.setPlaying(true);
+            userRepo.save(user);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al reproducir: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean pause(String email) {
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            String userToken = user.getSpotiSimpleToken();
+            if (userToken == null) return false;
+
+            String url = "https://api.spotify.com/v1/me/player/pause";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(userToken);
+            
+            restTemplate.put(url, new HttpEntity<>(headers), String.class);
+            user.setPlaying(false);
+            userRepo.save(user);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al pausar: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean selectDevice(String email, String deviceId) {
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            String userToken = user.getSpotiSimpleToken();
+            if (userToken == null) return false;
+
+            String url = "https://api.spotify.com/v1/me/player";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(userToken);
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("device_ids", List.of(deviceId));
+            body.put("play", user.isPlaying());
+
+            restTemplate.put(url, new HttpEntity<>(body, headers), String.class);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al seleccionar dispositivo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public Map<String, Object> checkSubscription(String email) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            long now = System.currentTimeMillis();
+            long expirationDate = user.getExpirationDate();
+            
+            boolean isActive = user.isPaid() && expirationDate > now;
+            long daysRemaining = isActive ? (expirationDate - now) / (1000 * 60 * 60 * 24) : 0;
+            
+            result.put("active", isActive);
+            result.put("expirationDate", expirationDate);
+            result.put("daysRemaining", daysRemaining);
+            result.put("isPaid", user.isPaid());
+            
+            return result;
+        } catch (Exception e) {
+            result.put("active", false);
+            result.put("error", e.getMessage());
+            return result;
         }
     }
 }

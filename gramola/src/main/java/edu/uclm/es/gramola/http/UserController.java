@@ -128,4 +128,14 @@ public class UserController {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
+    @GetMapping("/transactions/{email}")
+    public ResponseEntity<Object> getTransactions(@PathVariable String email) {
+        return ResponseEntity.ok(service.getTransactionHistory(email));
+    }
+
+    @GetMapping("/subscription-status/{email}")
+    public ResponseEntity<Map<String, Object>> getSubscriptionStatus(@PathVariable String email) {
+        return ResponseEntity.ok(service.getSubscriptionStatus(email));
+    }
 }
