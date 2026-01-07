@@ -1,0 +1,9 @@
+<div>
+  <h2>Eliminar usuario</h2>
+  <label>ID</label>
+  <input type="number" [(ngModel)]="id" name="id">
+  <button (click)="remove()">Eliminar</button>
+
+  <p *ngIf="ok" style="color:green">{{ ok }}</p>
+  <p *ngIf="err" style="color:red">{{ err }}</p>
+</div>

@@ -1,0 +1,53 @@
+<div class="register-page">
+  <div class="register-card">
+    <h2>Crea tu cuenta de Bar</h2>
+    <p class="subtitle">Únete a La Gramola y gestiona tu música</p>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="email" name="email" placeholder="ejemplo@bar.com">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre del Bar</label>
+      <input type="text" [(ngModel)]="bar" name="bar" placeholder="Nombre de tu establecimiento">
+    </div>
+
+    <div class="form-group">
+      <label>Spotify Client ID</label>
+      <input type="text" [(ngModel)]="clientId" name="clientId" placeholder="Tu Client ID de Spotify">
+    </div>
+
+    <div class="form-group">
+      <label>Spotify Client Secret</label>
+      <input type="password" [(ngModel)]="clientSecret" name="clientSecret" placeholder="Tu Client Secret">
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input type="password" [(ngModel)]="pwd1" name="password" placeholder="Mínimo 8 caracteres">
+    </div>
+
+    <div class="form-group">
+      <label>Confirmar Contraseña</label>
+      <input type="password" [(ngModel)]="pwd2" name="confirmPassword" placeholder="Repite tu contraseña">
+    </div>
+
+    <button class="btn-primary" (click)="registrar()">Registrar mi Bar</button>
+
+    <div class="messages">
+      <p *ngIf="msgOk" class="msg-ok">{{ msgOk }}</p>
+      <p *ngIf="msgErr" class="msg-err">{{ msgErr }}</p>
+      <div *ngIf="registroOk" class="alert-success">
+        ✅ Registro realizado con éxito. Revisa el enlace en la terminal de tu Backend.
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="login-section">
+      <p>¿Ya tienes cuenta?</p>
+      <button class="btn-secondary" (click)="goToLogin()">Volver al Login</button>
+    </div>
+  </div>
+</div>

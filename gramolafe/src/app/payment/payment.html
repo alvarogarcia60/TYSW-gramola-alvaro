@@ -1,0 +1,56 @@
+<div class="payment-container">
+  <div class="payment-card">
+    <div class="secure-badge">
+      <span class="lock-icon">🔒</span> Encriptación SSL de 256 bits
+    </div>
+    
+    <header class="payment-header">
+      <h2>Finalizar Registro</h2>
+      <div class="bar-tag">
+        <span class="bar-icon">🏢</span>
+        <span class="bar-email">{{ emailURL }}</span>
+      </div>
+    </header>
+
+    <div class="plans-selector">
+      <label class="section-label">Selecciona tu Plan de Suscripción</label>
+      <div class="plans-grid">
+        <div *ngFor="let plan of listaPrecios" 
+             class="plan-option" 
+             [class.active]="planSeleccionado?.id === plan.id"
+             (click)="seleccionarPlan(plan)">
+          <div class="plan-info">
+            <span class="plan-name">{{ plan.nombre }}</span>
+            <span class="plan-desc">{{ plan.descripcion }}</span>
+          </div>
+          <span class="plan-price">{{ plan.importe }}€</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="payment-form-group">
+      <label class="section-label">Información de Pago</label>
+      <div id="card-element-container">
+        <div id="card-element"></div>
+      </div>
+    </div>
+
+    <button (click)="confirmarPago()" [disabled]="!stripe || mensaje.includes('éxito')" class="confirm-btn">
+      <span class="btn-content" *ngIf="!mensaje.includes('éxito')">
+        Pagar {{ planSeleccionado?.importe }}€ y Finalizar
+      </span>
+      <span class="btn-content success" *ngIf="mensaje.includes('éxito')">
+        ✓ Pago Completado
+      </span>
+    </button>
+
+    <div class="status-alert" *ngIf="mensaje" [ngClass]="{'err': mensaje.includes('Error'), 'ok': mensaje.includes('éxito')}">
+      <span class="alert-icon">{{ mensaje.includes('Error') ? '✕' : '✓' }}</span>
+      <span class="alert-text">{{ mensaje }}</span>
+    </div>
+
+    <footer class="payment-footer">
+      <p>Procesado de forma segura por <strong>Stripe</strong></p>
+    </footer>
+  </div>
+</div>
