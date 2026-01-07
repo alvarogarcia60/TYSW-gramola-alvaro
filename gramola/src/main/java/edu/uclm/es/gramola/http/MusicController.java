@@ -47,8 +47,11 @@ public class MusicController {
         String paymentIntentId = body.get("paymentIntentId") != null ? body.get("paymentIntentId").toString() : null;
         Object songDataObj = body.get("songData");
 
+        System.out.println("📥 Recibida solicitud add-paid. Email: " + email + ", PaymentIntent: " + paymentIntentId);
+
         Map<String, String> resp = new HashMap<>();
         if (!(songDataObj instanceof Map) || email == null || paymentIntentId == null) {
+            System.err.println("⚠️ Parámetros inválidos en /add-paid");
             resp.put("success", "false");
             resp.put("message", "Parámetros inválidos");
             return ResponseEntity.badRequest().body(resp);
@@ -56,10 +59,12 @@ public class MusicController {
 
         boolean ok = this.musicService.addSongPaid((Map<String, Object>) songDataObj, email, paymentIntentId);
         if (ok) {
+            System.out.println("✅ Canción añadida exitosamente");
             resp.put("success", "true");
             resp.put("message", "Canción añadida tras pago verificado");
             return ResponseEntity.ok(resp);
         } else {
+            System.err.println("❌ Falló la verificación del pago");
             resp.put("success", "false");
             resp.put("message", "Pago no verificado o intent inválido");
             return ResponseEntity.badRequest().body(resp);

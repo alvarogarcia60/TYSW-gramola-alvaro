@@ -1,9 +1,0 @@
-<div>
-  <h2>Detalle de usuario</h2>
-  <label>ID</label>
-  <input type="number" [(ngModel)]="id" name="id">
-  <button (click)="load()">Ver</button>
-
-  <pre *ngIf="user">{{ user | json }}</pre>
-  <p *ngIf="err" style="color:red">{{ err }}</p>
-</div>

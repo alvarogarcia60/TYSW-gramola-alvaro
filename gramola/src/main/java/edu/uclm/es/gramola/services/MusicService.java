@@ -19,14 +19,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import com.stripe.Stripe;
 import com.stripe.model.PaymentIntent;
 
 import edu.uclm.es.gramola.dao.PlaylistDao;
 import edu.uclm.es.gramola.dao.UserDao;
 import edu.uclm.es.gramola.model.Playlist;
 import edu.uclm.es.gramola.model.User;
-import jakarta.annotation.PostConstruct;
 
 @Service
 public class MusicService {
@@ -40,14 +38,6 @@ public class MusicService {
 
     @Value("${spotify.clientSecret:}")
     private String spotifyClientSecret;
-
-    @Value("${stripe.secret}")
-    private String stripeSecret;
-
-    @PostConstruct
-    public void initStripe() {
-        Stripe.apiKey = stripeSecret;
-    }
 
     public void addSong(Map<String, Object> songData, String email) {
         List<Playlist> currentQueue = this.playlistRepo.findByBarEmailOrderByQueuePositionAsc(Objects.requireNonNull(email));
@@ -218,14 +208,20 @@ public class MusicService {
 
     public boolean addSongPaid(Map<String, Object> songData, String email, String paymentIntentId) {
         try {
+            System.out.println("🔍 Verificando PaymentIntent: " + paymentIntentId);
             PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+            System.out.println("✅ PaymentIntent recuperado. Estado: " + intent.getStatus());
+            
             if (intent != null && "succeeded".equalsIgnoreCase(intent.getStatus())) {
+                System.out.println("💳 Pago verificado. Añadiendo canción...");
                 addSong(songData, email);
                 return true;
             }
+            System.err.println("❌ Pago no completado. Estado: " + (intent != null ? intent.getStatus() : "null"));
             return false;
         } catch (Exception e) {
-            System.err.println("Error verificando pago: " + e.getMessage());
+            System.err.println("❌ Error verificando pago: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }

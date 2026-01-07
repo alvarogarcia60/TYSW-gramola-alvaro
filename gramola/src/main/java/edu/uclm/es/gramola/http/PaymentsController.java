@@ -56,10 +56,6 @@ public class PaymentsController {
             .build();
 
         PaymentIntent intent = PaymentIntent.create(params);
-        
-        // Registramos el intento en nuestra tabla de transacciones a través del servicio
-        this.userService.saveStripeTransaction(email, request);
-
         return intent.toJson(); 
     }
 }
