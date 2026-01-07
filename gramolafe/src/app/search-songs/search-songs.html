@@ -2,48 +2,72 @@
   <header class="search-header">
     <h1>🎵 {{ barName }}</h1>
 
-    <div class="admin-device-panel" *ngIf="isAdmin">
-      <div class="device-selector-wrapper">
-        <label>🎧 Salida de Spotify:</label>
-        <select (change)="seleccionarDispositivo($event)" [value]="currentDevice?.id">
-          <option value="" disabled *ngIf="devices.length === 0">Buscando dispositivos...</option>
-          <option *ngFor="let d of devices" [value]="d.id">
-            {{ d.name }} - {{ d.type }} {{ d.is_active ? '(ACTIVO)' : '' }}
-          </option>
-        </select>
-        <button class="btn-refresh" (click)="cargarDispositivos()">🔄 Recargar</button>
+    @if (subscriptionWarning && isAdmin) {
+      <div class="subscription-warning-banner">
+        {{ subscriptionWarning }}
       </div>
-      
-      <div class="device-alert-banner" *ngIf="deviceError">
-        ⚠️ {{ deviceError }}. Abre Spotify en el bar.
-      </div>
-    </div>
-    
-    <div class="payment-success-banner" *ngIf="confirmacionPago">
-      {{ confirmacionPago }}
-    </div>
+    }
 
-    <div class="now-playing-container" *ngIf="miPlaylist.length > 0">
-      <div class="player-controls">
-        <button *ngIf="isAdmin" class="btn-player" (click)="togglePlayPause()">
-          {{ isPaused ? '▶️' : '⏸️' }}
-        </button>
+    @if (isAdmin) {
+      <div class="admin-device-panel">
+        <div class="device-selector-wrapper">
+          <label>🎧 Salida de Spotify:</label>
+          <select (change)="seleccionarDispositivo($event)" [value]="currentDevice?.id">
+            @if (devices.length === 0) {
+              <option value="" disabled>Buscando dispositivos...</option>
+            }
+            @for (d of devices; track d.id) {
+              <option [value]="d.id">
+                {{ d.name }} - {{ d.type }} {{ d.is_active ? '(ACTIVO)' : '' }}
+              </option>
+            }
+          </select>
+          <button class="btn-refresh" (click)="cargarDispositivos()">🔄 Recargar</button>
+        </div>
         
-        <div class="now-playing-info">
-          <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
-          <p><strong>{{ miPlaylist[0].title }}</strong> - {{ miPlaylist[0].artist }}</p>
-          <small class="pause-notice" *ngIf="isPaused && !isAdmin">
-            ⚠️ El dueño ha pausado la música momentáneamente.
-          </small>
+        @if (deviceError) {
+          <div class="device-alert-banner">
+            ⚠️ {{ deviceError }}. Abre Spotify en el bar.
+          </div>
+        }
+      </div>
+    }
+    
+    @if (confirmacionPago) {
+      <div class="payment-success-banner">
+        {{ confirmacionPago }}
+      </div>
+    }
+
+    @if (miPlaylist.length > 0) {
+      <div class="now-playing-container">
+        <div class="player-controls">
+          @if (isAdmin) {
+            <button class="btn-player" (click)="togglePlayPause()">
+              {{ isPaused ? '▶️' : '⏸️' }}
+            </button>
+          }
+          
+          <div class="now-playing-info">
+            <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
+            <p><strong>{{ miPlaylist[0].title }}</strong> - {{ miPlaylist[0].artist }}</p>
+            @if (isPaused && !isAdmin) {
+              <small class="pause-notice">
+                ⚠️ El dueño ha pausado la música momentáneamente.
+              </small>
+            }
+          </div>
+
+          @if (isAdmin) {
+            <button class="btn-player" (click)="nextSong()">⏭️</button>
+          }
         </div>
 
-        <button *ngIf="isAdmin" class="btn-player" (click)="nextSong()">⏭️</button>
+        <div class="progress-bg">
+          <div class="progress-fill" [style.width.%]="progreso"></div>
+        </div>
       </div>
-
-      <div class="progress-bg">
-        <div class="progress-fill" [style.width.%]="progreso"></div>
-      </div>
-    </div>
+    }
 
     <div class="search-container">
       <div class="search-box">
@@ -54,44 +78,56 @@
   </header>
 
   <main class="main-content">
-    <section class="results-area" *ngIf="tracks && tracks.length > 0">
-      <div class="results-grid">
-        <div *ngFor="let song of tracks" class="song-card">
-          <div class="cover-wrapper">
-            <img [src]="song.coverUrl" alt="Cover">
-          </div>
-          <div class="song-details">
-            <h3 class="song-title">{{ song.name }}</h3>
-            <p class="song-artist">{{ song.artistName }}</p>
-          </div>
-          <button class="btn-add-footer" (click)="addSongToQueue(song)">
-            {{ isAdmin ? '➕ Añadir Gratis' : '💳 Añadir (0.20€)' }}
-          </button>
+    @if (tracks && tracks.length > 0) {
+      <section class="results-area">
+        <div class="results-grid">
+          @for (song of tracks; track song.id) {
+            <div class="song-card">
+              <div class="cover-wrapper">
+                <img [src]="song.coverUrl" alt="Cover">
+              </div>
+              <div class="song-details">
+                <h3 class="song-title">{{ song.name }}</h3>
+                <p class="song-artist">{{ song.artistName }}</p>
+              </div>
+              <button class="btn-add-footer" (click)="addSongToQueue(song)">
+                {{ isAdmin ? '➕ Añadir Gratis' : '💳 Añadir (0.20€)' }}
+              </button>
+            </div>
+          }
         </div>
-      </div>
-    </section>
+      </section>
+    }
 
-    <section class="playlist-full-width" *ngIf="miPlaylist.length > 0">
-      <div class="playlist-header">
-        <h2>📋 Cola del Bar</h2>
-        <span class="badge">{{ miPlaylist.length }} temas</span>
-      </div>
-      <div class="playlist-horizontal-scroll">
-        <div *ngFor="let p of miPlaylist; let i = index" class="playlist-item-card" [class.active-track]="i === 0">
-          <div class="p-thumb-container">
-            <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
-            <button *ngIf="isAdmin" class="btn-delete-overlay" (click)="eliminarCancion(p.id)">🗑️</button>
-          </div>
-          <div class="p-info">
-            <span class="p-title">{{ p.title }}</span>
-            <span class="p-artist">{{ p.artist }}</span>
-          </div>
+    @if (miPlaylist.length > 0) {
+      <section class="playlist-full-width">
+        <div class="playlist-header">
+          <h2>📋 Cola del Bar</h2>
+          <span class="badge">{{ miPlaylist.length }} temas</span>
         </div>
-      </div>
-    </section>
+        <div class="playlist-horizontal-scroll">
+          @for (p of miPlaylist; track p.id; let i = $index) {
+            <div class="playlist-item-card" [class.active-track]="i === 0">
+              <div class="p-thumb-container">
+                <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
+                @if (isAdmin) {
+                  <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)">🗑️</button>
+                }
+              </div>
+              <div class="p-info">
+                <span class="p-title">{{ p.title }}</span>
+                <span class="p-artist">{{ p.artist }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
   </main>
 
-  <div class="toast-container" *ngIf="mensajeToast">
-    {{ mensajeToast }}
-  </div>
+  @if (mensajeToast) {
+    <div class="toast-container">
+      {{ mensajeToast }}
+    </div>
+  }
 </div>

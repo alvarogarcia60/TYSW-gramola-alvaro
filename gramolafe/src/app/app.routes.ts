@@ -5,6 +5,7 @@ import { RegisterComponent } from './register/register';
 import { PaymentComponent } from './payment/payment';
 import { SearchSongsComponent } from './search-songs/search-songs';
 import { MainMenuComponent } from './main-menu/main-menu';
+import { MyBarComponent } from './my-bar/my-bar';
 import { suscripcionGuard } from './guards/suscripcion.guard';
 import { CallbackComponent } from './callback/callback.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password';
@@ -32,5 +33,6 @@ export const routes: Routes = [
   },
   
   { path: 'main-menu', component: MainMenuComponent, canActivate: [suscripcionGuard] },
+  { path: 'my-bar', component: MyBarComponent, canActivate: [suscripcionGuard] },
   { path: '**', redirectTo: '' }
 ];

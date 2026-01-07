@@ -1,0 +1,88 @@
+<div class="my-bar-container">
+  <header class="bar-header">
+    <button class="back-btn" (click)="goBack()">← Volver</button>
+    <h1>{{ barName }}</h1>
+    <button class="logout-btn" (click)="logout()">Cerrar Sesión 🚪</button>
+  </header>
+
+  <main class="bar-content">
+    @if (loading) {
+      <div class="loading">Cargando...</div>
+    } @else {
+      <section class="subscription-section card">
+        <h2>📊 Estado de Suscripción</h2>
+        
+        @if (isActive) {
+          <div class="status-active">
+            <div class="status-icon">✅</div>
+            <div class="status-info">
+              <h3>Suscripción Activa</h3>
+              <p>Válida hasta: <strong>{{ expirationDateFormatted }}</strong></p>
+              <p>Días restantes: <strong>{{ daysRemaining }}</strong></p>
+            </div>
+          </div>
+        } @else {
+          <div class="status-inactive">
+            <div class="status-icon">⚠️</div>
+            <div class="status-info">
+              <h3>Suscripción Expirada o Inactiva</h3>
+              <p>Renueva tu suscripción para continuar usando todos los servicios</p>
+              <button class="renew-btn" (click)="renewSubscription()">Renovar Ahora</button>
+            </div>
+          </div>
+        }
+      </section>
+
+      <section class="transactions-section card">
+        <h2>💳 Historial de Transacciones</h2>
+        
+        @if (transactions.length === 0) {
+          <p class="empty-message">No hay transacciones registradas</p>
+        } @else {
+          <div class="transactions-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Fecha</th>
+                  <th>Concepto</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (transaction of transactions; track transaction.id) {
+                  <tr>
+                    <td class="transaction-id">{{ transaction.id }}</td>
+                    <td>{{ parseTransactionData(transaction.data).timestamp ? 
+                         (parseTransactionData(transaction.data).timestamp | date: 'dd/MM/yyyy HH:mm') : 
+                         'N/A' }}</td>
+                    <td>{{ parseTransactionData(transaction.data).concepto || 'Pago' }}</td>
+                    <td class="transaction-details">
+                      @if (parseTransactionData(transaction.data).songTitle) {
+                        <span>🎵 {{ parseTransactionData(transaction.data).songTitle }}</span>
+                      } @else {
+                        <span>📝 {{ parseTransactionData(transaction.data).description || 'Suscripción' }}</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <section class="prices-section card">
+        <h2>💰 Precios del Servicio</h2>
+        <div class="prices-grid">
+          @for (precio of precios; track precio.id) {
+            <div class="price-card">
+              <h4>{{ precio.concepto }}</h4>
+              <p class="price-amount">{{ precio.precio }} {{ precio.moneda }}</p>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </main>
+</div>

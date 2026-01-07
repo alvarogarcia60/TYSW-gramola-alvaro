@@ -70,6 +70,8 @@ ngOnInit() {
 
   goToGramola() { this.router.navigate(['/admin-jukebox']); }
   
+  goToMyBar() { this.router.navigate(['/my-bar']); }
+  
   goToAccount() {
     this.router.navigate(['/payment'], { queryParams: { email: this.emailBar } });
   }

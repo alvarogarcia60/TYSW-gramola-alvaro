@@ -29,16 +29,32 @@ export class MusicService {
     return this.http.delete(`${this.baseUrl}/delete-song/${id}`);
   }
 
-  // --- NUEVOS MÉTODOS PARA SECCIÓN 4.1 ---
+  // --- CONTROL DEL REPRODUCTOR (Sección 4.1) ---
   getDevices(email: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/devices?email=${email}`);
   }
 
-  setDevice(email: string, deviceId: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/set-device?email=${email}&deviceId=${deviceId}`, {});
+  selectDevice(email: string, deviceId: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/select-device?email=${email}&deviceId=${deviceId}`, {});
   }
 
-  // --- NUEVO MÉTODO: Inserción tras pago verificado (Requisito 4.6) ---
+  play(email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/play?email=${email}`, {});
+  }
+
+  pause(email: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/pause?email=${email}`, {});
+  }
+
+  checkSubscription(email: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/check-subscription?email=${email}`);
+  }
+
+  getPlaybackState(email: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/playback-state?email=${email}`);
+  }
+
+  // --- INSERCIÓN TRAS PAGO VERIFICADO (Requisito 4.6) ---
   addSongPaid(email: string, paymentIntentId: string, songData: any): Observable<any> {
     const body = { email, paymentIntentId, songData };
     return this.http.post(`${this.baseUrl}/add-paid`, body);

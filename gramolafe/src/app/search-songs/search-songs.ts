@@ -24,6 +24,8 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   devices: any[] = [];
   currentDevice: any = null;
   deviceError: string | null = null;
+  subscriptionStatus: any = null;
+  subscriptionWarning: string | null = null;
 
   isAdmin: boolean = false; 
   progreso = 0;
@@ -49,6 +51,7 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
       this.emailBar = sessionStorage.getItem("emailLogeado") || "";
       this.isAdmin = true;
       this.cargarDispositivos(); // Sección 4.1: Carga inicial de dispositivos [cite: 227]
+      this.checkSubscription(); // Verificar estado de suscripción
     }
 
     // Feedback de pago local para el cliente [cite: 132]
@@ -101,16 +104,59 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   seleccionarDispositivo(event: any) {
     const deviceId = event.target.value;
     // Requisito: El bar selecciona un dispositivo de salida [cite: 43]
-    this.musicService.setDevice(this.emailBar, deviceId).subscribe(() => {
+    this.musicService.selectDevice(this.emailBar, deviceId).subscribe(() => {
       this.cargarDispositivos();
+      this.mensajeToast = "Dispositivo actualizado";
+      setTimeout(() => this.mensajeToast = null, 2000);
     });
   }
 
-  togglePlayPause() {
+  checkSubscription() {
+    this.musicService.checkSubscription(this.emailBar).subscribe({
+      next: (status: any) => {
+        this.subscriptionStatus = status;
+        if (!status.isActive) {
+          this.subscriptionWarning = "⚠️ Tu suscripción ha expirado. Renueva para continuar usando la Gramola.";
+        } else if (status.daysRemaining <= 7) {
+          this.subscriptionWarning = `⚠️ Tu suscripción expira en ${status.daysRemaining} días.`;
+        }
+      }
+    });
+  }
+
+  play() {
     if (this.isAdmin) {
-      this.musicService.toggleReproduccion(this.emailBar).subscribe(() => {
-        this.isPaused = !this.isPaused;
+      this.musicService.play(this.emailBar).subscribe({
+        next: () => {
+          this.isPaused = false;
+          this.mensajeToast = "Reproducción iniciada";
+          setTimeout(() => this.mensajeToast = null, 2000);
+        },
+        error: () => {
+          this.mensajeToast = "Error al reproducir. Verifica dispositivo Spotify.";
+          setTimeout(() => this.mensajeToast = null, 3000);
+        }
       });
+    }
+  }
+
+  pause() {
+    if (this.isAdmin) {
+      this.musicService.pause(this.emailBar).subscribe({
+        next: () => {
+          this.isPaused = true;
+          this.mensajeToast = "Reproducción pausada";
+          setTimeout(() => this.mensajeToast = null, 2000);
+        }
+      });
+    }
+  }
+
+  togglePlayPause() {
+    if (this.isPaused) {
+      this.play();
+    } else {
+      this.pause();
     }
   }
 

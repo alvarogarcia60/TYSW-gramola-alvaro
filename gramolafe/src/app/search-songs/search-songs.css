@@ -21,6 +21,26 @@
     font-weight: 800;
 }
 
+/* Banner de Advertencia de Suscripción */
+.subscription-warning-banner {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 12px;
+    margin: 0 auto 20px;
+    max-width: 900px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+}
+
 .search-container {
     display: flex;
     justify-content: center;
