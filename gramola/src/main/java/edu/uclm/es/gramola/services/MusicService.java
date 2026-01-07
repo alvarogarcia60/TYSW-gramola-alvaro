@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,10 +19,14 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.stripe.Stripe;
+import com.stripe.model.PaymentIntent;
+
 import edu.uclm.es.gramola.dao.PlaylistDao;
 import edu.uclm.es.gramola.dao.UserDao;
 import edu.uclm.es.gramola.model.Playlist;
 import edu.uclm.es.gramola.model.User;
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class MusicService {
@@ -29,6 +34,20 @@ public class MusicService {
     @Autowired private UserDao userRepo;
     @Autowired private PlaylistDao playlistRepo;
     @Autowired private RestTemplate restTemplate;
+
+    @Value("${spotify.clientId:}")
+    private String spotifyClientId;
+
+    @Value("${spotify.clientSecret:}")
+    private String spotifyClientSecret;
+
+    @Value("${stripe.secret}")
+    private String stripeSecret;
+
+    @PostConstruct
+    public void initStripe() {
+        Stripe.apiKey = stripeSecret;
+    }
 
     public void addSong(Map<String, Object> songData, String email) {
         List<Playlist> currentQueue = this.playlistRepo.findByBarEmailOrderByQueuePositionAsc(Objects.requireNonNull(email));
@@ -100,10 +119,21 @@ public class MusicService {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public List<Map<String, Object>> search(String texto, String email) {
-        if (email == null) return new ArrayList<>();
-        User user = userRepo.findById(email).orElseThrow();
-        
-        String token = getAccessToken(user.getClientId(), user.getClientSecret());
+        String token = "";
+        try {
+            if (email != null) {
+                User user = userRepo.findById(email).orElse(null);
+                if (user != null && user.getClientId() != null && user.getClientSecret() != null) {
+                    token = getAccessToken(user.getClientId(), user.getClientSecret());
+                } else {
+                    token = getAccessToken(spotifyClientId, spotifyClientSecret);
+                }
+            } else {
+                token = getAccessToken(spotifyClientId, spotifyClientSecret);
+            }
+        } catch (Exception e) {
+            token = getAccessToken(spotifyClientId, spotifyClientSecret);
+        }
         String url = "https://api.spotify.com/v1/search?q=" + texto + "&type=track&limit=10";
         
         HttpHeaders headers = new HttpHeaders();
@@ -184,5 +214,19 @@ public class MusicService {
             headers.setBearerAuth(userToken);
             restTemplate.postForEntity(url, new HttpEntity<>(headers), String.class);
         } catch (Exception e) { System.err.println("Error en cola: " + e.getMessage()); }
+    }
+
+    public boolean addSongPaid(Map<String, Object> songData, String email, String paymentIntentId) {
+        try {
+            PaymentIntent intent = PaymentIntent.retrieve(paymentIntentId);
+            if (intent != null && "succeeded".equalsIgnoreCase(intent.getStatus())) {
+                addSong(songData, email);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            System.err.println("Error verificando pago: " + e.getMessage());
+            return false;
+        }
     }
 }

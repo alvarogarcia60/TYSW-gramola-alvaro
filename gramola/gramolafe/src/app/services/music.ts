@@ -37,4 +37,20 @@ export class MusicService {
   setDevice(email: string, deviceId: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/set-device?email=${email}&deviceId=${deviceId}`, {});
   }
+
+  // --- NUEVO MÉTODO: Inserción tras pago verificado (Requisito 4.6) ---
+  addSongPaid(email: string, paymentIntentId: string, songData: any): Observable<any> {
+    const body = { email, paymentIntentId, songData };
+    return this.http.post(`${this.baseUrl}/add-paid`, body);
+  }
+}
+
+// Tipo canónico para resultados de búsqueda (Requisito 4.5)
+export interface TrackObject {
+  id: string;
+  name: string;
+  uri: string;
+  artistName: string;
+  coverUrl: string;
+  raw?: any; // referencia al objeto original de Spotify para envío a backend/pago
 }

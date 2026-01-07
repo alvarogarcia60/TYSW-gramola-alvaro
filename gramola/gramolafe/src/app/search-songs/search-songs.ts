@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'; // Corregido: importado de @angular/core
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MusicService } from '../services/music';
+import { MusicService, TrackObject } from '../services/music';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -13,7 +13,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class SearchSongsComponent implements OnInit, OnDestroy {
   textoBusqueda = "";
-  songs: any[] = [];
+  tracks: TrackObject[] = [];
   miPlaylist: any[] = [];
   emailBar: string = "";
   barName: string = "La Gramola"; 
@@ -135,29 +135,48 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Alias explícito para requisito 4.4
+  getCurrentPlayList() {
+    this.cargarPlaylist();
+  }
+
   buscar() {
     if (!this.textoBusqueda || this.textoBusqueda.trim().length < 3) return;
     this.musicService.search(this.textoBusqueda, this.emailBar).subscribe({
-      next: (data) => this.songs = data,
+      next: (items: any[]) => {
+        // Mapear a TrackObject[]
+        this.tracks = (items || []).map((it: any) => {
+          const cover = it?.album?.images?.[0]?.url || '';
+          const artist = it?.artists?.[0]?.name || 'Artista desconocido';
+          return {
+            id: it?.id,
+            name: it?.name,
+            uri: it?.uri,
+            artistName: artist,
+            coverUrl: cover,
+            raw: it
+          } as TrackObject;
+        });
+      },
       error: () => this.mensajeToast = "El servicio de este bar no está activo."
     });
   }
 
-  addSongToQueue(song: any) {
+  addSongToQueue(track: TrackObject) {
     if (this.isAdmin) {
       // El dueño añade canciones gratis [cite: 43]
-      this.musicService.addSong(song, this.emailBar).subscribe({
+      this.musicService.addSong(track.raw, this.emailBar).subscribe({
         next: () => {
           this.mensajeToast = "Canción añadida gratis por el dueño";
           this.cargarPlaylist();
-          this.songs = [];
+          this.tracks = [];
           setTimeout(() => this.mensajeToast = null, 3000);
         },
         error: () => alert("Error al añadir. Revisa tu suscripción.")
       });
     } else {
       // El cliente debe pagar para añadir (Sección 2.4 y 4.8) [cite: 48, 105]
-      sessionStorage.setItem("pendingSong", JSON.stringify(song));
+      sessionStorage.setItem("pendingSong", JSON.stringify(track.raw));
       this.router.navigate(['/payment'], { queryParams: { email: this.emailBar } });
     }
   }

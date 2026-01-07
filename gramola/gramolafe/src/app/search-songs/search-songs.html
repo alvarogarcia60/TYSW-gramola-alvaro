@@ -54,15 +54,15 @@
   </header>
 
   <main class="main-content">
-    <section class="results-area" *ngIf="songs && songs.length > 0">
+    <section class="results-area" *ngIf="tracks && tracks.length > 0">
       <div class="results-grid">
-        <div *ngFor="let song of songs" class="song-card">
+        <div *ngFor="let song of tracks" class="song-card">
           <div class="cover-wrapper">
-            <img [src]="song.album.images[0]?.url" alt="Cover">
+            <img [src]="song.coverUrl" alt="Cover">
           </div>
           <div class="song-details">
             <h3 class="song-title">{{ song.name }}</h3>
-            <p class="song-artist">{{ song.artists[0].name }}</p>
+            <p class="song-artist">{{ song.artistName }}</p>
           </div>
           <button class="btn-add-footer" (click)="addSongToQueue(song)">
             {{ isAdmin ? '➕ Añadir Gratis' : '💳 Añadir (0.20€)' }}

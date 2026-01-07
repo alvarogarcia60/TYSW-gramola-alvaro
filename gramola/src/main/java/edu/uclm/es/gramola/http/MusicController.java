@@ -1,9 +1,11 @@
 package edu.uclm.es.gramola.http;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +27,7 @@ public class MusicController {
     @Autowired private MusicService musicService;
 
     @GetMapping("/search")
-    public List<Map<String, Object>> search(@RequestParam String texto, @RequestParam String email) {
+    public List<Map<String, Object>> search(@RequestParam String texto, @RequestParam(required = false) String email) {
         return this.musicService.search(texto, email);
     }
 
@@ -37,6 +39,31 @@ public class MusicController {
     @PostMapping("/add")
     public void add(@RequestBody Map<String, Object> songData, @RequestParam String email) {
         this.musicService.addSong(songData, email);
+    }
+
+    @PostMapping("/add-paid")
+    public ResponseEntity<Map<String, String>> addPaid(@RequestBody Map<String, Object> body) {
+        String email = body.get("email") != null ? body.get("email").toString() : null;
+        String paymentIntentId = body.get("paymentIntentId") != null ? body.get("paymentIntentId").toString() : null;
+        Object songDataObj = body.get("songData");
+
+        Map<String, String> resp = new HashMap<>();
+        if (!(songDataObj instanceof Map) || email == null || paymentIntentId == null) {
+            resp.put("success", "false");
+            resp.put("message", "Parámetros inválidos");
+            return ResponseEntity.badRequest().body(resp);
+        }
+
+        boolean ok = this.musicService.addSongPaid((Map<String, Object>) songDataObj, email, paymentIntentId);
+        if (ok) {
+            resp.put("success", "true");
+            resp.put("message", "Canción añadida tras pago verificado");
+            return ResponseEntity.ok(resp);
+        } else {
+            resp.put("success", "false");
+            resp.put("message", "Pago no verificado o intent inválido");
+            return ResponseEntity.badRequest().body(resp);
+        }
     }
 
     @DeleteMapping("/delete-song/{id}")

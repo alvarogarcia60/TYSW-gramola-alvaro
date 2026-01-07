@@ -79,47 +79,76 @@ export class PaymentComponent implements OnInit {
 
   async confirmarPago() {
     if (!this.stripe || !this.cardElement || !this.planSeleccionado) return;
-
     this.mensaje = "Procesando pago seguro... ⏳";
 
-    // Generar token de tarjeta seguro en Stripe
-    const { token, error } = await this.stripe.createToken(this.cardElement);
+    // Si es pago de canción, usar PaymentIntent (nuevo flujo 4.6)
+    if (this.songData) {
+      const prepayBody = {
+        email: this.emailURL,
+        amount: this.planSeleccionado.importe
+      };
 
+      this.http.post('http://localhost:8080/payments/prepay', prepayBody, { responseType: 'text' }).subscribe({
+        next: async (raw) => {
+          const intent = JSON.parse(raw);
+          const clientSecret = intent.client_secret;
+
+          const result = await this.stripe!.confirmCardPayment(clientSecret, {
+            payment_method: { card: this.cardElement! }
+          });
+
+          if (result.error) {
+            this.mensaje = "❌ " + result.error.message;
+            return;
+          }
+
+          const paymentIntentId = result.paymentIntent?.id;
+          if (!paymentIntentId) {
+            this.mensaje = "❌ No se pudo confirmar el pago";
+            return;
+          }
+
+          // Añadir canción en posición 2 tras pago verificado
+          this.http.post('http://localhost:8080/music/add-paid', {
+            email: this.emailURL,
+            paymentIntentId,
+            songData: this.songData
+          }).subscribe({
+            next: () => {
+              sessionStorage.setItem("lastPayment", JSON.stringify({ titulo: this.songData.name }));
+              sessionStorage.removeItem("pendingSong");
+              this.mensaje = "¡Pago realizado y canción colada en la cola! ✅";
+              setTimeout(() => this.router.navigate(['/jukebox', this.emailURL]), 1500);
+            },
+            error: (err) => {
+              this.mensaje = "❌ Error añadiendo la canción tras el pago: " + (err.error?.message || "Servidor no disponible");
+            }
+          });
+        },
+        error: (err) => {
+          this.mensaje = "❌ Error al iniciar el pago: " + (err.error?.message || "Servidor no disponible");
+        }
+      });
+      return;
+    }
+
+    // Si no hay canción (suscripción del dueño), mantener flujo existente
+    const { token, error } = await this.stripe.createToken(this.cardElement);
     if (error) {
       this.mensaje = "❌ " + error.message;
       return;
     }
-
-    // 5. Construimos el cuerpo asegurando que no haya valores null críticos para el Backend
     const body = {
-      tokenId: token.id,
+      tokenId: token!.id,
       email: this.emailURL,
-      tokenConfirmacion: this.tokenURL, 
+      tokenConfirmacion: this.tokenURL,
       planId: this.planSeleccionado.id,
-      amount: Math.round(this.planSeleccionado.importe * 100), 
-      // Mapeo exacto para que MusicService no de error al insertar
-      songTitle: this.songData ? this.songData.name : null,
-      songArtist: this.songData ? this.songData.artists[0]?.name : null,
-      songCover: this.songData ? this.songData.album?.images[0]?.url : null
+      amount: Math.round(this.planSeleccionado.importe * 100)
     };
-
     this.http.post('http://localhost:8080/users/pay', body).subscribe({
       next: () => {
-        if (this.songData) {
-          sessionStorage.setItem("lastPayment", JSON.stringify({ titulo: this.songData.name }));
-          sessionStorage.removeItem("pendingSong");
-        }
-
         this.mensaje = "¡Pago realizado con éxito! ✅";
-        
-        setTimeout(() => {
-          if (this.songData) {
-            this.router.navigate(['/jukebox', this.emailURL]);
-          } else {
-            // Tras pagar la suscripción, el bar ya puede loguearse (Sección 2.4)
-            this.router.navigate(['/login']);
-          }
-        }, 2000);
+        setTimeout(() => this.router.navigate(['/login']), 1500);
       },
       error: (err) => {
         this.mensaje = "❌ Error al procesar el pago: " + (err.error?.message || "Servidor no disponible");
