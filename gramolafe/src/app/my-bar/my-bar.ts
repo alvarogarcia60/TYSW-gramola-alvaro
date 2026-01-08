@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UserService } from '../services/user.service';
@@ -11,13 +11,14 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './my-bar.html',
   styleUrl: './my-bar.css'
 })
-export class MyBarComponent implements OnInit {
+export class MyBarComponent implements OnInit, OnDestroy {
   barName: string = '';
   email: string = '';
   subscriptionStatus: any = null;
   transactions: any[] = [];
   loading: boolean = true;
   precios: any[] = [];
+  refreshInterval: any;
 
   constructor(
     private userService: UserService,
@@ -35,8 +36,21 @@ export class MyBarComponent implements OnInit {
       this.loadSubscriptionStatus();
       this.loadTransactions();
       this.loadPrecios();
+
+      // Refresco en tiempo real cada 5 segundos
+      this.refreshInterval = setInterval(() => {
+        this.loadSubscriptionStatus();
+        this.loadTransactions(); // Refresca el historial también
+      }, 5000);
     } else {
       this.router.navigate(['/login']);
+    }
+  }
+
+  ngOnDestroy() {
+    // Limpiar el intervalo cuando se destruye el componente
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
     }
   }
 
@@ -109,8 +123,18 @@ export class MyBarComponent implements OnInit {
     }
   }
 
-  renewSubscription() {
-    this.router.navigate(['/payment'], { queryParams: { email: this.email } });
+  formatPaymentDate(timestamp: number): string {
+    if (!timestamp || timestamp === 0) {
+      return 'N/A';
+    }
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: '2-digit', 
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 
   goBack() {
@@ -123,6 +147,8 @@ export class MyBarComponent implements OnInit {
   }
 
   selectPlan(precio: any) {
+    // Redirige al pago con el plan seleccionado
+    // El backend extenderá la suscripción desde la fecha de expiración actual (si activa) o desde hoy (si expirada)
     this.router.navigate(['/payment'], {
       queryParams: { email: this.email, planId: precio.id }
     });

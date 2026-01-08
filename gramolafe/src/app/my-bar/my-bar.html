@@ -18,7 +18,7 @@
             <div class="status-info">
               <h3>Suscripción Activa</h3>
               <p>Válida hasta: <strong>{{ expirationDateFormatted }}</strong></p>
-              <p>Días restantes: <strong>{{ daysRemaining }}</strong></p>
+              <p>Días restantes: <strong>{{ daysRemaining }} días</strong></p>
             </div>
           </div>
         } @else {
@@ -26,8 +26,7 @@
             <div class="status-icon">⚠️</div>
             <div class="status-info">
               <h3>Suscripción Expirada o Inactiva</h3>
-              <p>Renueva tu suscripción para continuar usando todos los servicios</p>
-              <button class="renew-btn" (click)="renewSubscription()">Renovar Ahora</button>
+              <p>Renueva tu suscripción usando los planes de abajo</p>
             </div>
           </div>
         }
@@ -44,7 +43,7 @@
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Fecha</th>
+                  <th>Fecha de Pago</th>
                   <th>Concepto</th>
                   <th>Detalles</th>
                 </tr>
@@ -53,15 +52,15 @@
                 @for (transaction of transactions; track transaction.id) {
                   <tr>
                     <td class="transaction-id">{{ transaction.id }}</td>
-                    <td>{{ parseTransactionData(transaction.data).timestamp ? 
-                         (parseTransactionData(transaction.data).timestamp | date: 'dd/MM/yyyy HH:mm') : 
-                         'N/A' }}</td>
+                    <td class="transaction-date">{{ formatPaymentDate(transaction.paymentDate) }}</td>
                     <td>{{ parseTransactionData(transaction.data).concepto || 'Pago' }}</td>
                     <td class="transaction-details">
                       @if (parseTransactionData(transaction.data).songTitle) {
                         <span>🎵 {{ parseTransactionData(transaction.data).songTitle }}</span>
+                      } @else if (parseTransactionData(transaction.data).includes('Renovación')) {
+                        <span>📝 Renovación de Suscripción</span>
                       } @else {
-                        <span>📝 {{ parseTransactionData(transaction.data).description || 'Suscripción' }}</span>
+                        <span>📝 {{ parseTransactionData(transaction.data).substring(0, 50) }}...</span>
                       }
                     </td>
                   </tr>
@@ -73,16 +72,16 @@
       </section>
 
       <section class="prices-section card">
-        <h2>💰 Precios del Servicio</h2>
+        <h2>💰 Renovar Suscripción</h2>
         @if (precios.length === 0) {
-          <p class="empty-message">Aún no hay precios configurados.</p>
+          <p class="empty-message">Aún no hay planes disponibles.</p>
         } @else {
           <div class="prices-grid">
             @for (precio of precios; track precio.id) {
               <button type="button" class="price-card" (click)="selectPlan(precio)">
                 <h4>{{ precio.concepto }}</h4>
                 <p class="price-amount">{{ precio.importe ?? precio.precio }} {{ precio.moneda }}</p>
-                <p class="price-caption">Se aplicará desde: {{ isActive ? expirationDateFormatted : 'hoy' }}</p>
+                <p class="price-caption">✅ Extiende tu suscripción desde: {{ isActive ? expirationDateFormatted : 'hoy' }}</p>
               </button>
             }
           </div>

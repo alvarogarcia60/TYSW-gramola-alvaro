@@ -123,22 +123,150 @@
   font-weight: 700;
 }
 
+.renewal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
 .renew-btn {
-  background: #ff4d4d;
+  background: #1db954;
   color: white;
   border: none;
-  padding: 12px 22px;
+  padding: 12px 18px;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 700;
-  margin-top: 10px;
   transition: all 0.25s ease;
-  box-shadow: 0 8px 18px rgba(255, 77, 77, 0.25);
+  box-shadow: 0 8px 18px rgba(29, 185, 84, 0.25);
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 200px;
 }
 
-.renew-btn:hover {
-  background: #ff6666;
+.renew-btn.monthly {
+  background: #1db954;
+}
+
+.renew-btn.annual {
+  background: #b3741d;
+}
+
+.renew-btn:hover:not([disabled]) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(29, 185, 84, 0.35);
+}
+
+.renew-btn.annual:hover:not([disabled]) {
+  box-shadow: 0 12px 24px rgba(179, 116, 29, 0.35);
+}
+
+.renew-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-dialog {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 16px;
+  padding: 28px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.modal-dialog h3 {
+  margin: 0 0 16px;
+  color: #fff;
+  font-size: 1.3rem;
+}
+
+.modal-dialog p {
+  color: #b3b3b3;
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.modal-detail {
+  background: rgba(29, 185, 84, 0.12);
+  border: 1px solid rgba(29, 185, 84, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px !important;
+}
+
+.modal-detail strong {
+  color: #1db954;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-cancel,
+.btn-confirm {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+}
+
+.btn-cancel {
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff9999;
+  border: 1px solid rgba(255, 77, 77, 0.3);
+}
+
+.btn-cancel:hover:not([disabled]) {
+  background: rgba(255, 77, 77, 0.25);
+  border-color: rgba(255, 77, 77, 0.5);
+}
+
+.btn-confirm {
+  background: #1db954;
+  color: #fff;
+  border: 1px solid #1db954;
+  box-shadow: 0 8px 16px rgba(29, 185, 84, 0.3);
+}
+
+.btn-confirm:hover:not([disabled]) {
+  background: #1ed760;
+  border-color: #1ed760;
+  box-shadow: 0 12px 20px rgba(29, 185, 84, 0.35);
   transform: translateY(-1px);
+}
+
+.btn-cancel[disabled],
+.btn-confirm[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.transaction-date {
+  color: #1db954;
+  font-weight: 600;
 }
 
 .transactions-table {

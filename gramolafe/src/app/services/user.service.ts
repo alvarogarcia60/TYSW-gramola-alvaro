@@ -15,4 +15,8 @@ export class UserService {
   getSubscriptionStatus(email: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/subscription-status/${email}`);
   }
+
+  renewSubscription(email: string, plan: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/renew-subscription?email=${email}&plan=${plan}`, {});
+  }
 }
