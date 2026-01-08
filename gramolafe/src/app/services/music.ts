@@ -59,6 +59,20 @@ export class MusicService {
     const body = { email, paymentIntentId, songData };
     return this.http.post(`${this.baseUrl}/add-paid`, body);
   }
+
+  // --- Limpieza masiva de la cola (admin) ---
+  clearQueue(email: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/clear-queue?email=${email}`);
+  }
+
+  // --- SINCRONIZACIÓN CON COLA REAL DE SPOTIFY ---
+  getSpotifyQueue(email: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/spotify-queue?email=${email}`);
+  }
+
+  syncQueue(email: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/sync-queue?email=${email}`);
+  }
 }
 
 // Tipo canónico para resultados de búsqueda (Requisito 4.5)

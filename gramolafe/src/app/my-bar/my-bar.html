@@ -74,14 +74,19 @@
 
       <section class="prices-section card">
         <h2>💰 Precios del Servicio</h2>
-        <div class="prices-grid">
-          @for (precio of precios; track precio.id) {
-            <div class="price-card">
-              <h4>{{ precio.concepto }}</h4>
-              <p class="price-amount">{{ precio.precio }} {{ precio.moneda }}</p>
-            </div>
-          }
-        </div>
+        @if (precios.length === 0) {
+          <p class="empty-message">Aún no hay precios configurados.</p>
+        } @else {
+          <div class="prices-grid">
+            @for (precio of precios; track precio.id) {
+              <button type="button" class="price-card" (click)="selectPlan(precio)">
+                <h4>{{ precio.concepto }}</h4>
+                <p class="price-amount">{{ precio.importe ?? precio.precio }} {{ precio.moneda }}</p>
+                <p class="price-caption">Se aplicará desde: {{ isActive ? expirationDateFormatted : 'hoy' }}</p>
+              </button>
+            }
+          </div>
+        }
       </section>
     }
   </main>

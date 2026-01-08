@@ -116,8 +116,20 @@ public class UserService {
             // Si es pago de suscripción del bar (Figura 13, Paso 25)
             User user = userRepo.findById(email).orElse(null);
             if (user != null) {
+                // Determinar duración según plan (mensual/anual) y extender desde la fecha de expiración vigente
+                String planId = data.getOrDefault("planId", "").toString().toUpperCase();
+                long now = System.currentTimeMillis();
+                long currentExpiration = user.getExpirationDate();
+                long start = Math.max(now, currentExpiration); // si está activa, empieza a contar desde su expiración actual
+
+                // Por defecto 30 días (mensual). Si detectamos anual, sumamos 365 días.
+                long durationMs = 30L * 24 * 60 * 60 * 1000;
+                if (planId.contains("ANUAL") || planId.contains("ANUALIDAD") || planId.contains("ANUALIDAD")) {
+                    durationMs = 365L * 24 * 60 * 60 * 1000;
+                }
+
                 user.setPaid(true);
-                user.setExpirationDate(System.currentTimeMillis() + 2592000000L); // 30 días
+                user.setExpirationDate(start + durationMs);
                 userRepo.save(user);
             }
         }

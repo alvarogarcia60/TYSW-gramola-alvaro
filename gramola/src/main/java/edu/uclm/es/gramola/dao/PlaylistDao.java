@@ -14,4 +14,7 @@ public interface PlaylistDao extends CrudRepository<Playlist, Long> {
     
     // Método alternativo sin orden (por compatibilidad si se necesita)
     List<Playlist> findByBarEmail(String barEmail);
+
+    // Borrado masivo por bar
+    void deleteByBarEmail(String barEmail);
 }

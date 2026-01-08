@@ -57,3 +57,16 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Gestión de borrado en Gramola (Frontend)
+
+- Alcance: la eliminación de canciones afecta únicamente a la cola de Gramola/BD. Spotify no se modifica.
+- Confirmación: el botón de borrar solicita confirmación y muestra que el borrado es solo en Gramola.
+- Restricción: las acciones de borrado están limitadas a administradores (dueños del bar).
+- Limpieza masiva: los administradores pueden usar el botón "Limpiar cola" para vaciar la cola en Gramola.
+- Auto-limpieza: las canciones reproducidas desaparecen automáticamente de Gramola conforme avanza la reproducción.
+
+Endpoints backend relacionados (ya implementados):
+
+- `DELETE /music/delete-song/{id}`: elimina una canción de la cola en BD.
+- `DELETE /music/clear-queue?email=<barEmail>`: limpieza masiva de la cola en BD.

@@ -93,6 +93,15 @@ public class MusicController {
         this.musicService.deleteSong(id);
     }
 
+    @DeleteMapping("/clear-queue")
+    public ResponseEntity<Map<String, String>> clearQueue(@RequestParam String email) {
+        this.musicService.clearQueue(email);
+        Map<String, String> resp = new HashMap<>();
+        resp.put("success", "true");
+        resp.put("message", "Cola borrada para " + email);
+        return ResponseEntity.ok(resp);
+    }
+
     @GetMapping("/devices")
     public List<Map<String, Object>> getDevices(@RequestParam String email) {
         return this.musicService.getDevices(email);
@@ -133,6 +142,18 @@ public class MusicController {
     @GetMapping("/check-subscription")
     public ResponseEntity<Map<String, Object>> checkSubscription(@RequestParam String email) {
         Map<String, Object> result = this.musicService.checkSubscription(email);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/spotify-queue")
+    public ResponseEntity<Map<String, Object>> getSpotifyQueue(@RequestParam String email) {
+        Map<String, Object> result = this.musicService.getSpotifyQueue(email);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/sync-queue")
+    public ResponseEntity<Map<String, Object>> syncQueue(@RequestParam String email) {
+        Map<String, Object> result = this.musicService.syncQueue(email);
         return ResponseEntity.ok(result);
     }
 }

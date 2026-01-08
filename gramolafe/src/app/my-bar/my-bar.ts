@@ -67,7 +67,8 @@ export class MyBarComponent implements OnInit {
   loadPrecios() {
     this.http.get<any[]>('http://localhost:8080/precios/lista').subscribe({
       next: (data) => {
-        this.precios = data;
+        // Mostrar solo planes de suscripción para el dueño (oculta precio por canción)
+        this.precios = (data || []).filter(p => (p?.id || '').includes('SUB'));
       },
       error: (err) => {
         console.error('Error al cargar precios:', err);
@@ -119,5 +120,11 @@ export class MyBarComponent implements OnInit {
   logout() {
     sessionStorage.clear();
     this.router.navigate(['/login']);
+  }
+
+  selectPlan(precio: any) {
+    this.router.navigate(['/payment'], {
+      queryParams: { email: this.email, planId: precio.id }
+    });
   }
 }

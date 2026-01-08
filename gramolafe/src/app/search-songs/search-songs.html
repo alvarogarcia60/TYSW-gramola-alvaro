@@ -2,37 +2,6 @@
   <header class="search-header">
     <h1>🎵 {{ barName }}</h1>
 
-    @if (subscriptionWarning && isAdmin) {
-      <div class="subscription-warning-banner">
-        {{ subscriptionWarning }}
-      </div>
-    }
-
-    @if (isAdmin) {
-      <div class="admin-device-panel">
-        <div class="device-selector-wrapper">
-          <label>🎧 Salida de Spotify:</label>
-          <select (change)="seleccionarDispositivo($event)" [value]="currentDevice?.id">
-            @if (devices.length === 0) {
-              <option value="" disabled>Buscando dispositivos...</option>
-            }
-            @for (d of devices; track d.id) {
-              <option [value]="d.id">
-                {{ d.name }} - {{ d.type }} {{ d.is_active ? '(ACTIVO)' : '' }}
-              </option>
-            }
-          </select>
-          <button class="btn-refresh" (click)="cargarDispositivos()">🔄 Recargar</button>
-        </div>
-        
-        @if (deviceError) {
-          <div class="device-alert-banner">
-            ⚠️ {{ deviceError }}. Abre Spotify en el bar.
-          </div>
-        }
-      </div>
-    }
-    
     @if (confirmacionPago) {
       <div class="payment-success-banner">
         {{ confirmacionPago }}
@@ -49,8 +18,19 @@
           }
           
           <div class="now-playing-info">
-            <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
-            <p><strong>{{ miPlaylist[0].title }}</strong> - {{ miPlaylist[0].artist }}</p>
+            <div class="np-info">
+              @if (nowPlayingCoverUrl) {
+                <img [src]="nowPlayingCoverUrl" alt="Cover" class="np-cover" />
+              } @else {
+                @if (miPlaylist[0]?.coverUrl) {
+                  <img [src]="miPlaylist[0].coverUrl" alt="Cover" class="np-cover" />
+                }
+              }
+              <div class="np-text">
+                <p class="np-title"><strong>{{ (nowPlaying?.title || miPlaylist[0]?.title) }}</strong></p>
+                <p class="np-artist">{{ (nowPlaying?.artist || miPlaylist[0]?.artist) }}</p>
+              </div>
+            </div>
             @if (isPaused && !isAdmin) {
               <small class="pause-notice">
                 ⚠️ El dueño ha pausado la música momentáneamente.
@@ -58,14 +38,17 @@
             }
           </div>
 
-          @if (isAdmin) {
-            <button class="btn-player" (click)="nextSong()">⏭️</button>
-          }
+          <!-- Botón de "Siguiente" deshabilitado para mantener la cola intacta -->
         </div>
 
         <div class="progress-bg">
-          <div class="progress-fill" [style.width.%]="progreso"></div>
+          <div class="progress-fill" [style.width.%]="(nowPlayingProgressMs !== null && nowPlayingDurationMs) ? (nowPlayingProgressMs / nowPlayingDurationMs) * 100 : progreso"></div>
         </div>
+        @if (nowPlayingProgressMs !== null && nowPlayingDurationMs) {
+          <div class="np-times">
+            <small>{{ formatMs(nowPlayingProgressMs) }} / {{ formatMs(nowPlayingDurationMs) }}</small>
+          </div>
+        }
       </div>
     }
 
@@ -104,6 +87,10 @@
         <div class="playlist-header">
           <h2>📋 Cola del Bar</h2>
           <span class="badge">{{ miPlaylist.length }} temas</span>
+          @if (isAdmin) {
+            <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
+            <button class="btn-refresh" (click)="clearQueue()" style="margin-left: auto;">🧹 Limpiar cola</button>
+          }
         </div>
         <div class="playlist-horizontal-scroll">
           @for (p of miPlaylist; track p.id; let i = $index) {
@@ -111,7 +98,7 @@
               <div class="p-thumb-container">
                 <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
                 @if (isAdmin) {
-                  <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)">🗑️</button>
+                  <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)" title="Elimina solo en Gramola (no Spotify)">🗑️</button>
                 }
               </div>
               <div class="p-info">

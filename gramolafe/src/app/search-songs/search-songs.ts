@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core'; // Corregido: impo
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MusicService, TrackObject } from '../services/music';
+import { UserService } from '../services/user.service';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -26,15 +27,21 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   deviceError: string | null = null;
   subscriptionStatus: any = null;
   subscriptionWarning: string | null = null;
+  nowPlaying: { title: string; artist: string } | null = null;
+  nowPlayingCoverUrl: string | null = null;
+  nowPlayingProgressMs: number | null = null;
+  nowPlayingDurationMs: number | null = null;
 
   isAdmin: boolean = false; 
   progreso = 0;
   isPaused = false;
   private refreshTimer: any;
   private progressTimer: any;
+  private playbackTimer: any;
 
   constructor(
-    private musicService: MusicService, 
+    private musicService: MusicService,
+    private userService: UserService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -49,9 +56,19 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
     } else {
       // Si es Admin, recuperamos el email logueado [cite: 149]
       this.emailBar = sessionStorage.getItem("emailLogeado") || "";
+      if (!this.emailBar) {
+        const userStr = sessionStorage.getItem("user");
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            this.emailBar = user?.email || "";
+          } catch {}
+        }
+      }
       this.isAdmin = true;
       this.cargarDispositivos(); // Sección 4.1: Carga inicial de dispositivos [cite: 227]
       this.checkSubscription(); // Verificar estado de suscripción
+      this.loadPlaybackState(); // Estado real de reproducción desde Spotify
     }
 
     // Feedback de pago local para el cliente [cite: 132]
@@ -67,6 +84,7 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
 
     this.cargarPlaylist();
     this.refreshTimer = setInterval(() => { this.cargarPlaylist(); }, 5000);
+    this.playbackTimer = setInterval(() => { this.loadPlaybackState(); }, 5000);
     
     this.progressTimer = setInterval(() => {
       if (this.miPlaylist.length > 0 && !this.isPaused) {
@@ -79,6 +97,7 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.refreshTimer) clearInterval(this.refreshTimer);
     if (this.progressTimer) clearInterval(this.progressTimer);
+    if (this.playbackTimer) clearInterval(this.playbackTimer);
   }
 
   // Sección 4.1.1: Carga de dispositivos desde Spotify [cite: 233, 240]
@@ -112,14 +131,15 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   }
 
   checkSubscription() {
-    this.musicService.checkSubscription(this.emailBar).subscribe({
+    this.userService.getSubscriptionStatus(this.emailBar).subscribe({
       next: (status: any) => {
         this.subscriptionStatus = status;
-        if (!status.isActive) {
-          this.subscriptionWarning = "⚠️ Tu suscripción ha expirado. Renueva para continuar usando la Gramola.";
-        } else if (status.daysRemaining <= 7) {
-          this.subscriptionWarning = `⚠️ Tu suscripción expira en ${status.daysRemaining} días.`;
-        }
+        this.subscriptionWarning = !status?.active
+          ? "⚠️ Tu suscripción ha expirado. Renueva para continuar usando la Gramola."
+          : null;
+      },
+      error: () => {
+        this.subscriptionWarning = null;
       }
     });
   }
@@ -170,15 +190,68 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   }
 
   cargarPlaylist() {
-    this.musicService.getPlaylist(this.emailBar).subscribe((data: any) => {
-      const nuevasTracks = data.tracks || data; 
-      if (nuevasTracks.length < this.miPlaylist.length) this.progreso = 0;
-      this.miPlaylist = nuevasTracks;
-      this.isPaused = data.isPlaying !== undefined ? !data.isPlaying : this.isPaused;
-      
-      // Identidad dinámica: Recuperar nombre del bar [cite: 33, 72]
-      if (data.barName) this.barName = `La Gramola de ${data.barName}`;
+    // Cargar la cola de la base de datos (la fuente de verdad para el frontend)
+    this.musicService.getPlaylist(this.emailBar).subscribe({
+      next: (data: any) => {
+        console.log('📋 Cola de BD:', data);
+        this.miPlaylist = data || [];
+        
+        if (this.miPlaylist.length < 1) {
+          this.progreso = 0;
+        }
+      },
+      error: (err: any) => {
+        console.error('❌ Error al cargar cola de BD:', err);
+        this.miPlaylist = [];
+      }
     });
+  }
+
+  // Estado real del reproductor en Spotify
+  loadPlaybackState() {
+    this.musicService.getPlaybackState(this.emailBar).subscribe({
+      next: (state: any) => {
+        // Intentar mapear según estructura típica de Spotify o backend
+        // 1) Spotify: state.item.name, state.item.artists[0].name, state.is_playing
+        // 2) Backend propio: state.trackTitle, state.trackArtist, state.isPlaying
+        const title = state?.item?.name || state?.trackTitle || null;
+        const artist = (state?.item?.artists?.[0]?.name) || state?.trackArtist || null;
+        if (title && artist) {
+          this.nowPlaying = { title, artist };
+        }
+        // Portada
+        const cover = state?.item?.album?.images?.[0]?.url || state?.coverUrl || null;
+        this.nowPlayingCoverUrl = cover;
+        // Progreso y duración
+        const progressMs = (typeof state?.progress_ms === 'number') ? state.progress_ms : state?.progressMs;
+        const durationMs = (typeof state?.item?.duration_ms === 'number') ? state.item.duration_ms : state?.durationMs;
+        this.nowPlayingProgressMs = typeof progressMs === 'number' ? progressMs : null;
+        this.nowPlayingDurationMs = typeof durationMs === 'number' ? durationMs : null;
+        // Actualizar barra de progreso si tenemos datos reales
+        if (this.nowPlayingProgressMs !== null && this.nowPlayingDurationMs) {
+          const pct = (this.nowPlayingProgressMs / this.nowPlayingDurationMs) * 100;
+          this.progreso = Math.max(0, Math.min(100, pct));
+        }
+        // Sincronizar pausa/reproducción si viene del backend o API
+        if (typeof state?.is_playing === 'boolean') {
+          this.isPaused = !state.is_playing;
+        } else if (typeof state?.isPlaying === 'boolean') {
+          this.isPaused = !state.isPlaying;
+        }
+      },
+      error: () => {
+        // En caso de error, mantener último valor visible
+      }
+    });
+  }
+
+  // Utilidad: formatear milisegundos a mm:ss
+  formatMs(ms: number | null | undefined): string {
+    if (typeof ms !== 'number' || ms < 0) return '--:--';
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   }
 
   // Alias explícito para requisito 4.4
@@ -227,7 +300,39 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Borrado admin: solo afecta Gramola/BD (no Spotify)
   eliminarCancion(id: number) {
-    this.musicService.deleteSong(id).subscribe(() => this.cargarPlaylist());
+    if (!this.isAdmin) return;
+    const ok = confirm('¿Eliminar la canción solo en Gramola/BD? Spotify no se modifica.');
+    if (!ok) return;
+    this.musicService.deleteSong(id).subscribe({
+      next: () => {
+        this.mensajeToast = 'Canción eliminada en Gramola';
+        this.cargarPlaylist();
+        setTimeout(() => this.mensajeToast = null, 2000);
+      },
+      error: () => {
+        this.mensajeToast = 'No se pudo eliminar en Gramola';
+        setTimeout(() => this.mensajeToast = null, 2000);
+      }
+    });
+  }
+
+  // Limpieza masiva admin: solo Gramola/BD
+  clearQueue() {
+    if (!this.isAdmin) return;
+    const ok = confirm('¿Limpiar toda la cola en Gramola/BD? Spotify seguirá intacto.');
+    if (!ok) return;
+    this.musicService.clearQueue(this.emailBar).subscribe({
+      next: () => {
+        this.mensajeToast = 'Cola limpiada en Gramola';
+        this.cargarPlaylist();
+        setTimeout(() => this.mensajeToast = null, 2000);
+      },
+      error: () => {
+        this.mensajeToast = 'No se pudo limpiar la cola';
+        setTimeout(() => this.mensajeToast = null, 2000);
+      }
+    });
   }
 }

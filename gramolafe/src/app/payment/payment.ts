@@ -22,6 +22,7 @@ export class PaymentComponent implements OnInit {
   planSeleccionado: any = null;
   songData: any = null; 
   mensaje = '';
+  planIdURL: string | null = null;
 
   constructor(
     private route: ActivatedRoute, 
@@ -33,6 +34,7 @@ export class PaymentComponent implements OnInit {
     // 1. Recuperamos parámetros de la URL enviados por el redirect del backend
     this.emailURL = this.route.snapshot.queryParamMap.get('email');
     this.tokenURL = this.route.snapshot.queryParamMap.get('token');
+    this.planIdURL = this.route.snapshot.queryParamMap.get('planId');
     
     // 2. Verificamos si hay una canción pendiente de un cliente (Sección 4.6)
     const pending = sessionStorage.getItem("pendingSong");
@@ -55,7 +57,17 @@ export class PaymentComponent implements OnInit {
         } else {
           // Si no, filtramos por planes de suscripción para el dueño (Sección 2.4)
           this.listaPrecios = data.filter(p => p.id.includes('SUB'));
-          if (this.listaPrecios.length > 0) this.planSeleccionado = this.listaPrecios[0];
+          // Si viene un planId en la URL, preselecciónalo
+          if (this.planIdURL) {
+            const encontrado = data.find(p => p.id === this.planIdURL);
+            if (encontrado) {
+              this.planSeleccionado = encontrado;
+            }
+          }
+          // Fallback al primero si no hay preselección
+          if (!this.planSeleccionado && this.listaPrecios.length > 0) {
+            this.planSeleccionado = this.listaPrecios[0];
+          }
         }
       },
       error: () => this.mensaje = "Error al conectar con la base de datos de precios."
