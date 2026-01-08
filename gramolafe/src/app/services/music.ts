@@ -25,8 +25,8 @@ export class MusicService {
     return this.http.post(`${this.baseUrl}/toggle?email=${email}`, {});
   }
 
-  deleteSong(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/delete-song/${id}`);
+  deleteSong(id: number, email: string): Observable<any> {
+    return this.http.delete(`${this.baseUrl}/delete-song/${id}?email=${email}`);
   }
 
   // --- CONTROL DEL REPRODUCTOR (Sección 4.1) ---

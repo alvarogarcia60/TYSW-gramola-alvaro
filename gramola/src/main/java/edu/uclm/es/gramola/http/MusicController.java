@@ -89,8 +89,17 @@ public class MusicController {
     }
 
     @DeleteMapping("/delete-song/{id}")
-    public void delete(@PathVariable Long id) {
-        this.musicService.deleteSong(id);
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, @RequestParam String email) {
+        boolean ok = this.musicService.deleteSongForBar(id, email);
+        Map<String, String> resp = new HashMap<>();
+        resp.put("success", String.valueOf(ok));
+        if (ok) {
+            resp.put("message", "Canción eliminada para " + email);
+            return ResponseEntity.ok(resp);
+        } else {
+            resp.put("message", "La canción no pertenece a " + email + " o no existe");
+            return ResponseEntity.status(403).body(resp);
+        }
     }
 
     @DeleteMapping("/clear-queue")

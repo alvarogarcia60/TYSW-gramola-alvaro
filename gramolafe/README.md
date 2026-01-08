@@ -68,5 +68,5 @@ For more information on using the Angular CLI, including detailed command refere
 
 Endpoints backend relacionados (ya implementados):
 
-- `DELETE /music/delete-song/{id}`: elimina una canción de la cola en BD.
+- `DELETE /music/delete-song/{id}?email=<barEmail>`: elimina una canción de la cola en BD solo si pertenece a ese bar.
 - `DELETE /music/clear-queue?email=<barEmail>`: limpieza masiva de la cola en BD.

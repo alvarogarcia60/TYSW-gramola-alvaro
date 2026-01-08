@@ -181,8 +181,9 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
   }
 
   nextSong() {
+    if (!this.isAdmin) return;
     if (this.miPlaylist.length > 0) {
-      this.musicService.deleteSong(this.miPlaylist[0].id).subscribe(() => {
+      this.musicService.deleteSong(this.miPlaylist[0].id, this.emailBar).subscribe(() => {
         this.progreso = 0;
         this.cargarPlaylist();
       });
@@ -305,7 +306,7 @@ export class SearchSongsComponent implements OnInit, OnDestroy {
     if (!this.isAdmin) return;
     const ok = confirm('¿Eliminar la canción solo en Gramola/BD? Spotify no se modifica.');
     if (!ok) return;
-    this.musicService.deleteSong(id).subscribe({
+    this.musicService.deleteSong(id, this.emailBar).subscribe({
       next: () => {
         this.mensajeToast = 'Canción eliminada en Gramola';
         this.cargarPlaylist();

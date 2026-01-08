@@ -103,6 +103,28 @@ public class MusicService {
         // Por diseño, esta eliminación solo afecta a la Gramola/BD.
     }
 
+    /**
+     * Elimina una canción únicamente si pertenece al bar indicado por email.
+     * Devuelve true si se eliminó; false si no pertenece o no existe.
+     */
+    public boolean deleteSongForBar(Long id, String email) {
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(email);
+        Playlist toDelete = this.playlistRepo.findById(id).orElse(null);
+        if (toDelete == null) {
+            System.out.println("⚠️ Intento de borrar ID inexistente: " + id);
+            return false;
+        }
+        if (!email.equals(toDelete.getBarEmail())) {
+            System.out.println("⛔ ID " + id + " no pertenece a " + email + ", pertenece a " + toDelete.getBarEmail());
+            return false;
+        }
+        this.playlistRepo.deleteById(id);
+        System.out.println("🗑️ Canción con ID " + id + " eliminada de la playlist de " + email);
+        renormalizeQueue(email);
+        return true;
+    }
+
     public void clearQueue(String email) {
         Objects.requireNonNull(email);
         this.playlistRepo.deleteByBarEmail(email);

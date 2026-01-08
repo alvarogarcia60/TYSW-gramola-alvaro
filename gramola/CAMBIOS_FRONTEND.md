@@ -268,3 +268,25 @@ La ruta `/my-bar` está protegida con el guard de suscripción, asegurando que s
 ✅ **Control total de reproducción Spotify**
 
 El frontend está **listo para pruebas** y completamente alineado con los requisitos del profesor.
+
+---
+
+## 11. Gestión de borrado en Gramola (Admin)
+
+### Alcance y comportamiento
+- **Borrado en Gramola/BD:** El botón de borrar elimina la canción únicamente de la Gramola y la base de datos; no modifica la cola de Spotify.
+- **Auto-limpieza:** Las canciones reproducidas desaparecen automáticamente de la Gramola/BD según avanza la reproducción en Spotify.
+
+### Controles y UX
+- **Aviso visible:** En la cabecera de la cola se muestra el aviso “Elimina solo en Gramola (no Spotify)”.
+- **Confirmación:** Antes de borrar se solicita confirmación indicando “Spotify no se modifica”.
+- **Restricción de rol:** Los botones de borrar y “Limpiar cola” se muestran solo si `isAdmin` es verdadero.
+
+### Endpoints usados (backend)
+- `DELETE /music/clear-queue?email=<barEmail>`: Limpieza masiva de la cola del bar (solo admin).
+- `DELETE /music/delete-song/{id}?email=<barEmail>`: Elimina una canción por ID en Gramola/BD solo si pertenece a ese bar.
+
+### Cambios realizados
+- `search-songs.html`: Aviso admin y botón “🧹 Limpiar cola” con handler; `title` en el botón de borrar.
+- `search-songs.ts`: `eliminarCancion(id)` con confirmación y toast; `clearQueue()` con confirmación y llamada al servicio.
+- `music.ts`: Añadido `clearQueue(email: string)` que invoca el endpoint `DELETE /music/clear-queue`.
