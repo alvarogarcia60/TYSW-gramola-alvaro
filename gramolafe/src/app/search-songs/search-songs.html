@@ -8,6 +8,13 @@
       </div>
     }
 
+    <div class="search-container">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()" placeholder="Busca una canción en Spotify...">
+      </div>
+    </div>
+
     @if (miPlaylist.length > 0) {
       <div class="now-playing-container pro-player">
         <div class="cover-wrap">
@@ -38,21 +45,10 @@
             <button class="btn-player" (click)="togglePlayPause()" title="Reproducir/Pausar">
               {{ isPaused ? '▶️' : '⏸️' }}
             </button>
-            <button class="btn-player" (click)="nextSong()" title="Siguiente">
-              ⏭️
-            </button>
           }
         </div>
       </div>
     }
-    
-
-    <div class="search-container">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()" placeholder="Busca una canción en Spotify...">
-      </div>
-    </div>
   </header>
 
   <main class="main-content">
@@ -84,7 +80,6 @@
           <span class="badge">{{ miPlaylist.length }} temas</span>
           @if (isAdmin) {
             <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
-            <button class="btn-refresh" (click)="clearQueue()" style="margin-left: auto;">🧹 Limpiar cola</button>
           }
         </div>
         <div class="playlist-horizontal-scroll">
