@@ -9,36 +9,19 @@
     }
 
     @if (miPlaylist.length > 0) {
-      <div class="now-playing-container">
-        <div class="player-controls">
-          @if (isAdmin) {
-            <button class="btn-player" (click)="togglePlayPause()">
-              {{ isPaused ? '▶️' : '⏸️' }}
-            </button>
+      <div class="now-playing-container pro-player">
+        <div class="cover-wrap">
+          <img [src]="nowPlayingCoverUrl || miPlaylist[0]?.coverUrl" alt="Cover" class="cover-art" />
+        </div>
+        <div class="track-meta">
+          <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
+          <h3 class="track-title">{{ (nowPlaying?.title || miPlaylist[0]?.title) }}</h3>
+          <p class="track-artist">{{ (nowPlaying?.artist || miPlaylist[0]?.artist) }}</p>
+          @if (isPaused && !isAdmin) {
+            <small class="pause-notice">
+              ⚠️ El dueño ha pausado la música momentáneamente.
+            </small>
           }
-          
-          <div class="now-playing-info">
-            <div class="np-info">
-              @if (nowPlayingCoverUrl) {
-                <img [src]="nowPlayingCoverUrl" alt="Cover" class="np-cover" />
-              } @else {
-                @if (miPlaylist[0]?.coverUrl) {
-                  <img [src]="miPlaylist[0].coverUrl" alt="Cover" class="np-cover" />
-                }
-              }
-              <div class="np-text">
-                <p class="np-title"><strong>{{ (nowPlaying?.title || miPlaylist[0]?.title) }}</strong></p>
-                <p class="np-artist">{{ (nowPlaying?.artist || miPlaylist[0]?.artist) }}</p>
-              </div>
-            </div>
-            @if (isPaused && !isAdmin) {
-              <small class="pause-notice">
-                ⚠️ El dueño ha pausado la música momentáneamente.
-              </small>
-            }
-          </div>
-
-          <!-- Botón de "Siguiente" deshabilitado para mantener la cola intacta -->
         </div>
 
         <div class="progress-bg">
@@ -49,8 +32,20 @@
             <small>{{ formatMs(nowPlayingProgressMs) }} / {{ formatMs(nowPlayingDurationMs) }}</small>
           </div>
         }
+
+        <div class="pro-controls">
+          @if (isAdmin) {
+            <button class="btn-player" (click)="togglePlayPause()" title="Reproducir/Pausar">
+              {{ isPaused ? '▶️' : '⏸️' }}
+            </button>
+            <button class="btn-player" (click)="nextSong()" title="Siguiente">
+              ⏭️
+            </button>
+          }
+        </div>
       </div>
     }
+    
 
     <div class="search-container">
       <div class="search-box">
