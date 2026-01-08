@@ -8,99 +8,106 @@
       </div>
     }
 
-    <div class="search-container">
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()" placeholder="Busca una canción en Spotify...">
+    <!-- Contenedor de dos columnas: Reproductor a la izq, Búsqueda+Resultados a la der -->
+    <div class="two-column-container">
+      <!-- Columna Izquierda: Reproductor (FIJO) -->
+      @if (miPlaylist.length > 0) {
+        <div class="column-left">
+          <div class="now-playing-container pro-player">
+            <div class="cover-wrap">
+              <img [src]="nowPlayingCoverUrl || miPlaylist[0]?.coverUrl" alt="Cover" class="cover-art" />
+            </div>
+            <div class="track-meta">
+              <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
+              <h3 class="track-title">{{ (nowPlaying?.title || miPlaylist[0]?.title) }}</h3>
+              <p class="track-artist">{{ (nowPlaying?.artist || miPlaylist[0]?.artist) }}</p>
+              @if (isPaused && !isAdmin) {
+                <small class="pause-notice">
+                  ⚠️ El dueño ha pausado la música momentáneamente.
+                </small>
+              }
+            </div>
+
+            <div class="progress-bg">
+              <div class="progress-fill" [style.width.%]="(nowPlayingProgressMs !== null && nowPlayingDurationMs) ? (nowPlayingProgressMs / nowPlayingDurationMs) * 100 : progreso"></div>
+            </div>
+            @if (nowPlayingProgressMs !== null && nowPlayingDurationMs) {
+              <div class="np-times">
+                <small>{{ formatMs(nowPlayingProgressMs) }} / {{ formatMs(nowPlayingDurationMs) }}</small>
+              </div>
+            }
+
+            <div class="pro-controls">
+              @if (isAdmin) {
+                <button class="btn-player" (click)="togglePlayPause()" title="Reproducir/Pausar">
+                  {{ isPaused ? '▶️' : '⏸️' }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Columna Derecha: Búsqueda + Resultados -->
+      <div class="column-right">
+        <div class="search-container">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" [(ngModel)]="textoBusqueda" (keyup.enter)="buscar()" placeholder="Busca una canción en Spotify...">
+          </div>
+        </div>
+
+        @if (tracks && tracks.length > 0) {
+          <section class="results-area">
+            <div class="results-grid">
+              @for (song of tracks; track song.id) {
+                <div class="song-card">
+                  <div class="cover-wrapper">
+                    <img [src]="song.coverUrl" alt="Cover">
+                  </div>
+                  <div class="song-details">
+                    <h3 class="song-title">{{ song.name }}</h3>
+                    <p class="song-artist">{{ song.artistName }}</p>
+                  </div>
+                  <button class="btn-add-footer" (click)="addSongToQueue(song)">
+                    {{ isAdmin ? '➕ Añadir Gratis' : '💳 Añadir (0,50€)' }}
+                  </button>
+                </div>
+              }
+            </div>
+          </section>
+        }
       </div>
     </div>
-
-    @if (miPlaylist.length > 0) {
-      <div class="now-playing-container pro-player">
-        <div class="cover-wrap">
-          <img [src]="nowPlayingCoverUrl || miPlaylist[0]?.coverUrl" alt="Cover" class="cover-art" />
-        </div>
-        <div class="track-meta">
-          <span class="status-label">{{ isPaused ? 'PAUSADO' : 'REPRODUCIENDO' }}</span>
-          <h3 class="track-title">{{ (nowPlaying?.title || miPlaylist[0]?.title) }}</h3>
-          <p class="track-artist">{{ (nowPlaying?.artist || miPlaylist[0]?.artist) }}</p>
-          @if (isPaused && !isAdmin) {
-            <small class="pause-notice">
-              ⚠️ El dueño ha pausado la música momentáneamente.
-            </small>
-          }
-        </div>
-
-        <div class="progress-bg">
-          <div class="progress-fill" [style.width.%]="(nowPlayingProgressMs !== null && nowPlayingDurationMs) ? (nowPlayingProgressMs / nowPlayingDurationMs) * 100 : progreso"></div>
-        </div>
-        @if (nowPlayingProgressMs !== null && nowPlayingDurationMs) {
-          <div class="np-times">
-            <small>{{ formatMs(nowPlayingProgressMs) }} / {{ formatMs(nowPlayingDurationMs) }}</small>
-          </div>
-        }
-
-        <div class="pro-controls">
-          @if (isAdmin) {
-            <button class="btn-player" (click)="togglePlayPause()" title="Reproducir/Pausar">
-              {{ isPaused ? '▶️' : '⏸️' }}
-            </button>
-          }
-        </div>
-      </div>
-    }
   </header>
 
-  <main class="main-content">
-    @if (tracks && tracks.length > 0) {
-      <section class="results-area">
-        <div class="results-grid">
-          @for (song of tracks; track song.id) {
-            <div class="song-card">
-              <div class="cover-wrapper">
-                <img [src]="song.coverUrl" alt="Cover">
-              </div>
-              <div class="song-details">
-                <h3 class="song-title">{{ song.name }}</h3>
-                <p class="song-artist">{{ song.artistName }}</p>
-              </div>
-              <button class="btn-add-footer" (click)="addSongToQueue(song)">
-                {{ isAdmin ? '➕ Añadir Gratis' : '💳 Añadir (0,50€)' }}
-              </button>
+  @if (miPlaylist.length > 0) {
+    <section class="playlist-full-width">
+      <div class="playlist-header">
+        <h2>📋 Cola del Bar</h2>
+        <span class="badge">{{ miPlaylist.length }} temas</span>
+        @if (isAdmin) {
+          <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
+        }
+      </div>
+      <div class="playlist-horizontal-scroll">
+        @for (p of miPlaylist; track p.id; let i = $index) {
+          <div class="playlist-item-card" [class.active-track]="i === 0">
+            <div class="p-thumb-container">
+              <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
+              @if (isAdmin) {
+                <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)" title="Elimina solo en Gramola (no Spotify)">🗑️</button>
+              }
             </div>
-          }
-        </div>
-      </section>
-    }
-
-    @if (miPlaylist.length > 0) {
-      <section class="playlist-full-width">
-        <div class="playlist-header">
-          <h2>📋 Cola del Bar</h2>
-          <span class="badge">{{ miPlaylist.length }} temas</span>
-          @if (isAdmin) {
-            <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
-          }
-        </div>
-        <div class="playlist-horizontal-scroll">
-          @for (p of miPlaylist; track p.id; let i = $index) {
-            <div class="playlist-item-card" [class.active-track]="i === 0">
-              <div class="p-thumb-container">
-                <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
-                @if (isAdmin) {
-                  <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)" title="Elimina solo en Gramola (no Spotify)">🗑️</button>
-                }
-              </div>
-              <div class="p-info">
-                <span class="p-title">{{ p.title }}</span>
-                <span class="p-artist">{{ p.artist }}</span>
-              </div>
+            <div class="p-info">
+              <span class="p-title">{{ p.title }}</span>
+              <span class="p-artist">{{ p.artist }}</span>
             </div>
-          }
-        </div>
-      </section>
-    }
-  </main>
+          </div>
+        }
+      </div>
+    </section>
+  }
 
   @if (mensajeToast) {
     <div class="toast-container">
