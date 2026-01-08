@@ -138,4 +138,9 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> getSubscriptionStatus(@PathVariable String email) {
         return ResponseEntity.ok(service.getSubscriptionStatus(email));
     }
+
+    @PostMapping("/renew-subscription")
+    public ResponseEntity<Map<String, Object>> renewSubscription(@RequestParam String email, @RequestParam(defaultValue = "monthly") String plan) {
+        return ResponseEntity.ok(service.renewSubscription(email, plan));
+    }
 }

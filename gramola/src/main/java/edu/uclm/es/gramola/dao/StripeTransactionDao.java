@@ -10,4 +10,5 @@ import edu.uclm.es.gramola.model.StripeTransaction;
 @Repository
 public interface StripeTransactionDao extends JpaRepository<StripeTransaction, String> {
     List<StripeTransaction> findByEmailOrderByIdDesc(String email);
+    List<StripeTransaction> findByEmailOrderByPaymentDateDesc(String email);
 }

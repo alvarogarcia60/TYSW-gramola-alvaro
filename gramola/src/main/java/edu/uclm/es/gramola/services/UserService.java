@@ -103,6 +103,7 @@ public class UserService {
         st.setId(String.valueOf(data.getOrDefault("tokenId", UUID.randomUUID().toString())));
         st.setEmail(email);
         st.setData(data.toString());
+        st.setPaymentDate(System.currentTimeMillis()); // Registrar timestamp del pago
         this.stripeRepo.save(st);
 
         // Si el pago incluye datos de canción, va a la Rockola (Sección 4.6)
@@ -259,9 +260,9 @@ public class UserService {
         return true;
     }
 
-    // Obtener historial de transacciones del usuario
+    // Obtener historial de transacciones del usuario (ordenado por fecha de pago, más recientes primero)
     public List<StripeTransaction> getTransactionHistory(String email) {
-        return stripeRepo.findByEmailOrderByIdDesc(email);
+        return stripeRepo.findByEmailOrderByPaymentDateDesc(email);
     }
 
     // Obtener estado de suscripción del usuario
@@ -286,6 +287,47 @@ public class UserService {
         } catch (Exception e) {
             status.put("error", "Usuario no encontrado");
             return status;
+        }
+    }
+
+    // Renovar suscripción (mensual o anual)
+    public Map<String, Object> renewSubscription(String email, String plan) {
+        Map<String, Object> result = new java.util.HashMap<>();
+        try {
+            User user = userRepo.findById(email).orElseThrow();
+            long now = System.currentTimeMillis();
+            long currentExpiration = user.getExpirationDate();
+            long start = Math.max(now, currentExpiration); // si está activa, empieza a contar desde su expiración actual
+
+            long durationMs = 30L * 24 * 60 * 60 * 1000; // Mensual por defecto
+            if (plan != null && plan.toLowerCase().contains("anual")) {
+                durationMs = 365L * 24 * 60 * 60 * 1000;
+            }
+
+            user.setPaid(true);
+            user.setExpirationDate(start + durationMs);
+            userRepo.save(user);
+
+            // Registrar transacción de renovación
+            StripeTransaction st = new StripeTransaction();
+            st.setId(UUID.randomUUID().toString());
+            st.setEmail(email);
+            st.setData("Renovación de suscripción: " + plan);
+            st.setPaymentDate(System.currentTimeMillis());
+            stripeRepo.save(st);
+
+            result.put("success", true);
+            result.put("message", "Suscripción renovada");
+            result.put("newExpirationDate", user.getExpirationDate());
+            result.put("plan", plan);
+            
+            System.out.println("✅ Suscripción renovada para " + email + " - Plan: " + plan);
+            return result;
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            System.err.println("❌ Error renovando suscripción para " + email + ": " + e.getMessage());
+            return result;
         }
     }
 }

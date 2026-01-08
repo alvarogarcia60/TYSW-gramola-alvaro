@@ -16,6 +16,8 @@ public class StripeTransaction {
     private String data;
 
     private String email;
+    
+    private long paymentDate; // Timestamp de cuándo se realizó el pago
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -25,4 +27,7 @@ public class StripeTransaction {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    
+    public long getPaymentDate() { return paymentDate; }
+    public void setPaymentDate(long paymentDate) { this.paymentDate = paymentDate; }
 }
