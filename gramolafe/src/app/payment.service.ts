@@ -11,7 +11,6 @@ export class PaymentService {
   constructor(private http: HttpClient) { }
 
   prepay(email: string): Observable<any> {
-    // Configuramos el parámetro para el @RequestParam del Backend
     const params = new HttpParams().set('email', email);
     
     // Es importante que sea un POST y que pasemos los params en las opciones

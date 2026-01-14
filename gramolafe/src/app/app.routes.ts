@@ -18,20 +18,16 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
   { path: 'payment', component: PaymentComponent },
-  
   { path: 'callback', component: CallbackComponent },
-  
   { 
     path: 'admin-jukebox', 
     component: SearchSongsComponent, 
     canActivate: [suscripcionGuard] 
   },
-  
   { 
     path: 'jukebox/:barEmail', 
     component: SearchSongsComponent 
   },
-  
   { path: 'main-menu', component: MainMenuComponent, canActivate: [suscripcionGuard] },
   { path: 'my-bar', component: MyBarComponent, canActivate: [suscripcionGuard] },
   { path: '**', redirectTo: '' }

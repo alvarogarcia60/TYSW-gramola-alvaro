@@ -14,6 +14,28 @@
     </div>
 
     <div class="form-group">
+      <label>Dirección Postal</label>
+      <input type="text" [(ngModel)]="address" name="address" placeholder="Ej: Calle Principal 123, Madrid" 
+             title="Se usará para obtener tu ubicación y validar distancia">
+    </div>
+
+
+    <div class="form-group signature-section">
+      <label>Firma Digital del Dueño</label>
+      <small>Firma aquí para autenticar tu identidad como dueño del bar</small>
+      <div class="signature-container">
+        <canvas #signatureCanvas class="signature-canvas" width="400" height="200"></canvas>
+        <div class="signature-buttons">
+          <button type="button" class="btn-small btn-clear" (click)="clearSignature()">Limpiar</button>
+          <button type="button" class="btn-small btn-save" (click)="saveSignature()">Guardar Firma</button>
+        </div>
+      </div>
+      <p *ngIf="signatureMessage" [class.success]="signatureMessage.includes('guardada')" [class.error]="!signatureMessage.includes('guardada')" class="signature-message">
+        {{ signatureMessage }}
+      </p>
+    </div>
+
+    <div class="form-group">
       <label>Spotify Client ID</label>
       <input type="text" [(ngModel)]="clientId" name="clientId" placeholder="Tu Client ID de Spotify">
     </div>

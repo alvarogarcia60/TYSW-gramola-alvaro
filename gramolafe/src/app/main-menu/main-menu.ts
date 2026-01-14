@@ -38,9 +38,7 @@ ngOnInit() {
   }
 }
 
-  /**
-   * Redirige al backend para iniciar el Flujo 1 de OAuth 2.0 (Figura 19)
-   */
+  /* Redirige al backend para iniciar el Flujo 1 de OAuth 2.0 */
   loginWithSpotify() {
     console.log("Iniciando Flujo 1: Solicitud de permisos a Spotify...");
     // Redirigimos al endpoint que creamos en el UserController del Backend

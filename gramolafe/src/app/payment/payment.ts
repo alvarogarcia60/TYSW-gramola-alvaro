@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 import { HttpClient } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-payment',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, NgIf, NgFor, FormsModule],
   templateUrl: './payment.html',
   styleUrl: './payment.css'
 })
@@ -36,7 +36,7 @@ export class PaymentComponent implements OnInit {
     this.tokenURL = this.route.snapshot.queryParamMap.get('token');
     this.planIdURL = this.route.snapshot.queryParamMap.get('planId');
     
-    // 2. Verificamos si hay una canción pendiente de un cliente (Sección 4.6)
+    // 2. Verificar si hay una canción pendiente de pago
     const pending = sessionStorage.getItem("pendingSong");
     if (pending) {
       this.songData = JSON.parse(pending);
@@ -47,24 +47,24 @@ export class PaymentComponent implements OnInit {
       return; 
     }
 
-    // 3. Cargar precios desde la BD (Suscripciones y Canción)
+    // Cargar lista de precios desde el backend
     this.http.get<any[]>('http://localhost:8080/precios/lista').subscribe({
       next: (data) => {
         this.listaPrecios = data;
         if (this.songData) {
-          // Si hay canción pendiente, forzamos el plan de CANCIÓN
+          // Si hay canción pendiente, seleccionar plan CANCIÓN
           this.planSeleccionado = data.find(p => p.id === 'CANCIÓN');
         } else {
-          // Si no, filtramos por planes de suscripción para el dueño (Sección 2.4)
+          // Filtrar planes de suscripción
           this.listaPrecios = data.filter(p => p.id.includes('SUB'));
-          // Si viene un planId en la URL, preselecciónalo
+          // Si viene un planId en la URL, preseleccionarlo
           if (this.planIdURL) {
             const encontrado = data.find(p => p.id === this.planIdURL);
             if (encontrado) {
               this.planSeleccionado = encontrado;
             }
           }
-          // Fallback al primero si no hay preselección
+          // Usar el primer plan por defecto
           if (!this.planSeleccionado && this.listaPrecios.length > 0) {
             this.planSeleccionado = this.listaPrecios[0];
           }
@@ -160,7 +160,7 @@ export class PaymentComponent implements OnInit {
     this.http.post('http://localhost:8080/users/pay', body).subscribe({
       next: () => {
         this.mensaje = "¡Pago realizado con éxito! ✅";
-        setTimeout(() => this.router.navigate(['/login']), 1500);
+        setTimeout(() => this.router.navigate(['/my-bar']), 1500);
       },
       error: (err) => {
         this.mensaje = "❌ Error al procesar el pago: " + (err.error?.message || "Servidor no disponible");

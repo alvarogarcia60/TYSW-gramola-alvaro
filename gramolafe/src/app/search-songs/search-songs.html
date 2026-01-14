@@ -1,16 +1,40 @@
 <div class="search-page">
   <header class="search-header">
-    <h1>🎵 {{ barName }}</h1>
+    <button class="hamburger-btn" (click)="mobileMenuOpen = !mobileMenuOpen" [class.active]="mobileMenuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="brand">
+      <span class="logo">🎵</span>
+      <h1>La Gramola</h1>
+    </div>
+    <div class="center-badge">
+      <span class="live-indicator">🔴</span>
+      <span>MÚSICA EN VIVO</span>
+    </div>
+    <div class="bar-info" [class.mobile-menu-open]="mobileMenuOpen">
+      <div class="bar-name-pill">
+        <span class="bar-icon">🎼</span>
+        <span>{{ barName }}</span>
+      </div>
+    </div>
+  </header>
 
+  <div class="page-content">
     @if (confirmacionPago) {
       <div class="payment-success-banner">
         {{ confirmacionPago }}
       </div>
     }
 
-    <!-- Contenedor de dos columnas: Reproductor a la izq, Búsqueda+Resultados a la der -->
+    @if (subscriptionWarning) {
+      <div class="geolocation-warning-banner">
+        {{ subscriptionWarning }}
+      </div>
+    }
+
     <div class="two-column-container">
-      <!-- Columna Izquierda: Reproductor (FIJO) -->
       @if (miPlaylist.length > 0) {
         <div class="column-left">
           <div class="now-playing-container pro-player">
@@ -48,7 +72,6 @@
         </div>
       }
 
-      <!-- Columna Derecha: Búsqueda + Resultados -->
       <div class="column-right">
         <div class="search-container">
           <div class="search-box">
@@ -79,39 +102,38 @@
         }
       </div>
     </div>
-  </header>
 
-  @if (miPlaylist.length > 0) {
-    <section class="playlist-full-width">
-      <div class="playlist-header">
-        <h2>📋 Cola del Bar</h2>
-        <span class="badge">{{ miPlaylist.length }} temas</span>
-        @if (isAdmin) {
-          <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
-        }
-      </div>
-      <div class="playlist-horizontal-scroll">
-        @for (p of miPlaylist; track p.id; let i = $index) {
-          <div class="playlist-item-card" [class.active-track]="i === 0">
-            <div class="p-thumb-container">
-              <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
-              @if (isAdmin) {
-                <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)" title="Elimina solo en Gramola (no Spotify)">🗑️</button>
-              }
+    @if (miPlaylist.length > 0) {
+      <section class="playlist-full-width">
+        <div class="playlist-header">
+          <h2>📋 Cola del Bar</h2>
+          <span class="badge">{{ miPlaylist.length }} temas</span>
+          @if (isAdmin) {
+            <span class="badge" style="margin-left: 10px;">Elimina solo en Gramola (no Spotify)</span>
+          }
+        </div>
+        <div class="playlist-horizontal-scroll">
+          @for (p of miPlaylist; track p.id; let i = $index) {
+            <div class="playlist-item-card" [class.active-track]="i === 0">
+              <div class="p-thumb-container">
+                <img [src]="p.coverUrl" alt="Cover" class="p-thumb">
+                @if (isAdmin) {
+                  <button class="btn-delete-overlay" (click)="eliminarCancion(p.id)" title="Elimina solo en Gramola (no Spotify)">🗑️</button>
+                }
+              </div>
+              <div class="p-info">
+                <span class="p-title">{{ p.title }}</span>
+                <span class="p-artist">{{ p.artist }}</span>
+              </div>
             </div>
-            <div class="p-info">
-              <span class="p-title">{{ p.title }}</span>
-              <span class="p-artist">{{ p.artist }}</span>
-            </div>
-          </div>
-        }
-      </div>
-    </section>
-  }
+          }
+        </div>
+      </section>
+    }
 
-  @if (mensajeToast) {
-    <div class="toast-container">
-      {{ mensajeToast }}
-    </div>
-  }
-</div>
+    @if (mensajeToast) {
+      <div class="toast-container">
+        {{ mensajeToast }}
+      </div>
+    }
+  </div>

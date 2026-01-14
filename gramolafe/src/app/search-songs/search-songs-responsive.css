@@ -1,0 +1,328 @@
+/* Diseño Responsive - TABLET (768px - 1024px) */
+@media (max-width: 1024px) {
+    .search-header {
+        padding: 15px 30px;
+    }
+
+    .center-badge {
+        padding: 8px 18px;
+        font-size: 0.85rem;
+        letter-spacing: 1.5px;
+    }
+
+    .two-column-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .column-left, .column-right {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+
+    .pro-player {
+        max-width: 100%;
+    }
+}
+
+/* Diseño Responsive - MOBILE (max-width: 768px) */
+@media (max-width: 768px) {
+    /* Header Móvil */
+    .search-header {
+        padding: 12px 20px;
+        flex-wrap: wrap;
+        position: relative;
+    }
+
+    .hamburger-btn {
+        display: flex;
+    }
+
+    .brand {
+        flex: 1;
+        justify-content: center;
+        order: 2;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+    }
+
+    .brand h1 {
+        font-size: 1.3rem;
+    }
+
+    /* Badge centrado oculto en mobile para ahorrar espacio */
+    .center-badge {
+        display: none;
+    }
+
+    /* Menú desplegable móvil */
+    .bar-info {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: 20px;
+        border-bottom: 1px solid #333;
+        transform: translateY(-100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        z-index: 99;
+    }
+
+    .bar-info.mobile-menu-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+
+    .bar-name-pill {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+
+    /* Contenido Principal */
+    .page-content {
+        padding: 15px;
+    }
+
+    /* Layout de 1 columna en móvil */
+    .two-column-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .column-left, .column-right {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    /* Reproductor móvil */
+    .pro-player {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .cover-wrap {
+        width: 150px;
+        height: 150px;
+    }
+
+    .track-title {
+        font-size: 1rem;
+    }
+
+    .track-artist {
+        font-size: 0.9rem;
+    }
+
+    /* Búsqueda móvil */
+    .search-container {
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        padding: 12px 16px;
+    }
+
+    .search-box input {
+        font-size: 0.95rem;
+    }
+
+    /* Grid de resultados responsive */
+    .results-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .song-card {
+        flex-direction: row;
+        gap: 15px;
+        padding: 12px;
+    }
+
+    .cover-wrapper {
+        width: 80px;
+        height: 80px;
+        flex-shrink: 0;
+    }
+
+    .song-details {
+        flex: 1;
+        text-align: left;
+    }
+
+    .song-title {
+        font-size: 0.95rem;
+    }
+
+    .song-artist {
+        font-size: 0.85rem;
+    }
+
+    .btn-add-footer {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
+    /* Cola horizontal con scroll táctil */
+    .playlist-full-width {
+        margin: 30px -15px 0 -15px;
+        padding: 20px 15px;
+    }
+
+    .playlist-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .playlist-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .playlist-horizontal-scroll {
+        /* Scroll suave táctil */
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        /* Ocultar scrollbar pero mantener funcionalidad */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .playlist-horizontal-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .playlist-item-card {
+        min-width: 140px;
+        max-width: 140px;
+    }
+
+    .p-thumb {
+        width: 140px;
+        height: 140px;
+    }
+
+    .p-info {
+        padding: 8px;
+    }
+
+    .p-title {
+        font-size: 0.85rem;
+    }
+
+    .p-artist {
+        font-size: 0.75rem;
+    }
+
+    /* Banners responsive */
+    .payment-success-banner,
+    .geolocation-warning-banner {
+        margin: 15px 0;
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+
+    /* Toast móvil */
+    .toast-container {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Diseño Responsive - MÓVIL PEQUEÑO (max-width: 480px) */
+@media (max-width: 480px) {
+    .search-header {
+        padding: 10px 15px;
+    }
+
+    .brand h1 {
+        font-size: 1.1rem;
+    }
+
+    .logo {
+        font-size: 1.5rem;
+    }
+
+    .page-content {
+        padding: 10px;
+    }
+
+    .cover-wrap {
+        width: 120px;
+        height: 120px;
+    }
+
+    .pro-player {
+        padding: 12px;
+    }
+
+    .track-title {
+        font-size: 0.95rem;
+    }
+
+    .results-grid {
+        gap: 12px;
+    }
+
+    .song-card {
+        padding: 10px;
+    }
+
+    .cover-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+
+    .song-title {
+        font-size: 0.9rem;
+    }
+
+    .playlist-item-card {
+        min-width: 120px;
+        max-width: 120px;
+    }
+
+    .p-thumb {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+
+@media (hover: none) and (pointer: coarse) {
+    /* Aumentar áreas táctiles en dispositivos touch */
+    .btn-add-footer,
+    .btn-player,
+    .btn-delete-overlay {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Mejorar scroll táctil con snap points */
+    .playlist-horizontal-scroll {
+        scroll-snap-type: x mandatory;
+    }
+
+    .playlist-item-card {
+        scroll-snap-align: start;
+    }
+
+    /* Feedback visual táctil */
+    .song-card:active,
+    .btn-add-footer:active {
+        transform: scale(0.98);
+    }
+}

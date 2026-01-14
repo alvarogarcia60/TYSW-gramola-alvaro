@@ -7,7 +7,6 @@ import { Observable } from 'rxjs';
 })
 export class UserService {
 
-  // CAMBIO CLAVE: Usamos 127.0.0.1 para que coincida con el host del navegador
   private url = "http://127.0.0.1:8080/users";
 
   constructor(private http: HttpClient) { }
@@ -18,7 +17,6 @@ export class UserService {
   }
 
   login(email: string, password: string): Observable<any> {
-    // CAMBIO CLAVE: También aquí usamos la IP exacta
     const loginUrl = "http://127.0.0.1:8080/users/login";
     
     const datos = {

@@ -1,9 +1,23 @@
 <div class="my-bar-container">
   <header class="bar-header">
-    <button class="back-btn" (click)="goBack()">← Volver</button>
-    <h1>{{ barName }}</h1>
-    <button class="logout-btn" (click)="logout()">Cerrar Sesión 🚪</button>
+    <div class="brand">
+      <span class="logo">🎼</span>
+      <h1>La Gramola <small>Admin Panel</small></h1>
+    </div>
+    <div class="user-pill">
+      <span>{{ barName }}</span>
+      <button class="logout-pill" (click)="logout()">Cerrar Sesión</button>
+    </div>
   </header>
+
+
+  @if (signatureImage) {
+    <section class="signature-section card">
+      <h2>Firma digital del dueño</h2>
+      <img [src]="signatureImage" alt="Firma" class="signature-image">
+      <p class="signature-label">Firma verificada y autenticada</p>
+    </section>
+  }
 
   <main class="bar-content">
     @if (loading) {
@@ -57,10 +71,10 @@
                     <td class="transaction-details">
                       @if (parseTransactionData(transaction.data).songTitle) {
                         <span>🎵 {{ parseTransactionData(transaction.data).songTitle }}</span>
-                      } @else if (parseTransactionData(transaction.data).includes('Renovación')) {
+                      } @else if (parseTransactionData(transaction.data).concepto && parseTransactionData(transaction.data).concepto.includes('Renovación')) {
                         <span>📝 Renovación de Suscripción</span>
                       } @else {
-                        <span>📝 {{ parseTransactionData(transaction.data).substring(0, 50) }}...</span>
+                        <span> {{ parseTransactionData(transaction.data).raw || parseTransactionData(transaction.data).concepto || 'Pago' }}...</span>
                       }
                     </td>
                   </tr>

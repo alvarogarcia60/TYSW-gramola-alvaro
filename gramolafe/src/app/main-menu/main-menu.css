@@ -127,13 +127,41 @@
     border: 1px solid #333;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
+    animation: fadeInScale 0.5s ease;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .dash-card:hover {
-    transform: translateY(-12px);
+    transform: translateY(-12px) scale(1.02);
     border-color: #1db954;
     background: #222;
-    box-shadow: 0 15px 40px rgba(29, 185, 84, 0.15);
+    box-shadow: 0 20px 50px rgba(29, 185, 84, 0.2);
+}
+
+.dash-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1db954, #1ed760);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.dash-card:hover::before {
+    opacity: 1;
 }
 
 .card-body {
@@ -186,28 +214,153 @@
     color: black;
 }
 
-/* ==========================================================================
-   RESPONSIVE
-   ========================================================================== */
+/* Diseño responsive */
+
 @media (max-width: 768px) {
     .dashboard-header {
-        padding: 15px 25px;
-        flex-direction: column;
-        gap: 15px;
+        padding: 15px 20px;
+        flex-wrap: wrap;
     }
-    
+
+    .brand {
+        flex: 1;
+        gap: 10px;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+    }
+
+    .brand h1 {
+        font-size: 1.3rem;
+    }
+
+    .brand h1 small {
+        font-size: 0.75rem;
+    }
+
+    .user-pill {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    .logout-pill {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
     .dashboard-content {
         padding: 30px 20px;
     }
     
     .welcome-text h2 {
+        font-size: 1.8rem;
+    }
+
+    .welcome-text p {
+        font-size: 0.95rem;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .dash-card {
+        padding: 25px 20px;
+    }
+
+    .card-icon {
         font-size: 2rem;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+    }
+
+    .spotify-widget {
+        padding: 15px 20px;
+    }
+
+    .track-name {
+        font-size: 1.1rem;
+    }
+
+    .mini-cover {
+        width: 50px;
+        height: 50px;
+    }
+
+    .spotify-notice {
+        padding: 20px;
+    }
+
+    .spotify-connect-btn {
+        padding: 10px 24px;
+        font-size: 0.95rem;
     }
 }
 
-/* ==========================================================================
-   WIDGET DE SINCRONIZACIÓN REAL (SPOTIFY STYLE)
-   ========================================================================== */
+@media (max-width: 480px) {
+    .dashboard-header {
+        padding: 12px 15px;
+    }
+
+    .logo {
+        font-size: 1.6rem;
+    }
+
+    .brand h1 {
+        font-size: 1.1rem;
+    }
+
+    .dashboard-content {
+        padding: 20px 15px;
+    }
+
+    .welcome-text h2 {
+        font-size: 1.5rem;
+    }
+
+    .actions-grid {
+        gap: 15px;
+    }
+
+    .dash-card {
+        padding: 20px 15px;
+    }
+
+    .card-icon {
+        font-size: 1.8rem;
+    }
+
+    .card-title {
+        font-size: 1.1rem;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+    }
+
+    .spotify-widget {
+        padding: 12px 15px;
+    }
+
+    .mini-cover {
+        width: 45px;
+        height: 45px;
+    }
+
+    .track-name {
+        font-size: 1rem;
+    }
+
+    .artist-name {
+        font-size: 0.85rem;
+    }
+}
+
 .spotify-widget {
     background: #181818;
     border: 1px solid #333;
@@ -218,7 +371,7 @@
     flex-direction: column;
     gap: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border-left: 5px solid #1db954; /* Detalle verde lateral */
+    border-left: 5px solid #1db954; 
 }
 
 .now-playing {
@@ -266,23 +419,20 @@
 
 /* La parte que se mueve */
 .progress-bar-fill {
-    background: #1db954; /* Verde Spotify */
+    background: #1db954; 
     height: 100%;
     border-radius: 10px;
-    transition: width 0.5s ease; /* Para que el movimiento sea fluido */
+    transition: width 0.5s ease; 
     box-shadow: 0 0 10px rgba(29, 185, 84, 0.6);
 }
 
-/* Estilo para el log de consola del error 0 undefined en el widget */
 .spotify-widget p {
     margin: 0;
     font-style: italic;
     color: #888;
 }
 
-/* ==========================================================================
-   AVISO Y BOTÓN DE CONEXIÓN A SPOTIFY
-   ========================================================================== */
+/* AVISO Y BOTÓN DE CONEXIÓN A SPOTIFY */
 .spotify-notice {
     background: linear-gradient(135deg, #1db954 0%, #1aa34a 100%);
     border-radius: 15px;

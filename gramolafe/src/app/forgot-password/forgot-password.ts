@@ -29,7 +29,6 @@ export class ForgotPasswordComponent {
     }
 
     this.isLoading = true;
-
     const body = { email: this.email };
 
     this.http.post<any>('http://localhost:8080/users/forgotPassword', body).subscribe({
@@ -37,15 +36,11 @@ export class ForgotPasswordComponent {
         this.isLoading = false;
         this.successMessage = response.message || 'Si el email existe, recibirás un enlace de recuperación';
         this.email = '';
-        // Redirigir al login después de 3 segundos
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 3000);
+        setTimeout(() => this.router.navigate(['/login']), 3000);
       },
       error: (err) => {
         this.isLoading = false;
         this.errorMessage = 'Error al procesar la solicitud. Intenta nuevamente.';
-        console.error('Error:', err);
       }
     });
   }

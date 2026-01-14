@@ -3,51 +3,80 @@
   background: #121212;
   color: #f1f1f1;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  padding: 30px 20px 60px;
+  padding: 0;
+  margin: 0;
 }
 
 .bar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(0, 0, 0, 0.65);
-  border: 1px solid #1f1f1f;
-  backdrop-filter: blur(8px);
-  padding: 18px 24px;
-  border-radius: 16px;
-  margin: 0 auto 28px;
-  max-width: 1200px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 20px 50px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.bar-header h1 {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo {
+  font-size: 2rem;
+}
+
+.brand h1 {
   margin: 0;
-  font-size: 1.7rem;
+  font-size: 1.6rem;
+  font-weight: 800;
   color: #1db954;
-  letter-spacing: 0.5px;
 }
 
-.back-btn,
-.logout-btn {
-  background: rgba(29, 185, 84, 0.12);
-  color: #ffffff;
-  border: 1px solid rgba(29, 185, 84, 0.35);
-  padding: 10px 18px;
-  border-radius: 12px;
+.brand h1 small {
+  color: #888;
+  font-size: 0.85rem;
+  display: block;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* Info de Usuario y Botón Salir */
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.user-pill span {
+  font-weight: 600;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.logout-pill {
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.5);
+  color: #ff4d4d;
+  padding: 8px 20px;
+  border-radius: 30px;
   cursor: pointer;
-  font-weight: 700;
-  transition: all 0.25s ease;
-  display: inline-flex;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.back-btn:hover,
-.logout-btn:hover {
-  background: #1db954;
-  color: #ffffff;
-  box-shadow: 0 8px 20px rgba(29, 185, 84, 0.35);
-  transform: translateY(-1px);
+.logout-pill:hover {
+  background: #ff4d4d;
+  color: white;
+  box-shadow: 0 0 15px rgba(255, 77, 77, 0.4);
+  transform: scale(1.05);
 }
 
 .bar-content {
@@ -56,6 +85,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding: 60px 50px;
 }
 
 .card {
@@ -64,6 +94,25 @@
   padding: 26px;
   border: 1px solid #222;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.5s ease;
+}
+
+.card:hover {
+  border-color: #333;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card h2 {
@@ -372,29 +421,150 @@ tr:hover {
 
 @media (max-width: 768px) {
   .bar-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    padding: 15px 20px;
+    flex-wrap: wrap;
   }
 
-  .bar-header h1 {
-    font-size: 1.4rem;
+  .brand {
+    flex: 1;
+    gap: 10px;
+  }
+
+  .logo {
+    font-size: 1.8rem;
+  }
+
+  .brand h1 {
+    font-size: 1.3rem;
+  }
+
+  .user-pill {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .logout-pill {
+    padding: 10px 16px;
+    font-size: 0.9rem;
   }
 
   .bar-content {
-    padding: 0 2px;
+    padding: 30px 20px;
   }
 
-  th,
-  td {
-    padding: 10px;
+  .card {
+    padding: 20px;
+    border-radius: 14px;
   }
 
-  .transactions-table {
-    font-size: 0.95rem;
+  .card h2 {
+    font-size: 1.4rem;
   }
 
   .prices-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
+
+  .transactions-table {
+    font-size: 0.85rem;
+    overflow-x: auto;
+    display: block;
+  }
+
+  th,
+  td {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
+
+  .signature-section {
+    padding: 20px;
+  }
+
+  .signature-image {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .bar-header {
+    padding: 12px 15px;
+  }
+
+  .logo {
+    font-size: 1.6rem;
+  }
+
+  .brand h1 {
+    font-size: 1.1rem;
+  }
+
+  .bar-content {
+    padding: 20px 15px;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  .card h2 {
+    font-size: 1.2rem;
+  }
+
+  .btn-renew {
+    padding: 10px 14px;
+    font-size: 0.85rem;
+  }
+
+  .transactions-table {
+    font-size: 0.8rem;
+  }
+
+  th,
+  td {
+    padding: 8px 6px;
+  }
+}
+
+/* Firma Digital Styles */
+.signature-section {
+  text-align: center;
+  background: linear-gradient(135deg, rgba(29, 185, 84, 0.06) 0%, rgba(29, 185, 84, 0.02) 100%);
+  border: 1px solid rgba(29, 185, 84, 0.25);
+  max-width: 960px;
+  margin: 0 auto 20px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signature-section h2 {
+  font-size: 1.3rem;
+  color: #f7f7f7;
+  margin-bottom: 16px;
+}
+
+.signature-image {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  max-height: 260px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #0f0f0f, #1a1a1a);
+  padding: 12px;
+  margin: 10px 0 6px;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.signature-label {
+  color: #9be5b1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-top: 4px !important;
 }

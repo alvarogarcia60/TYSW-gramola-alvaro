@@ -8,7 +8,6 @@ export class UserService {
 
   constructor(private http: HttpClient) { }
 
-  // Asegúrate de que esta firma tenga los 6 parámetros
   register(bar: string, email: string, pwd1: string, pwd2: string, clientId: string, clientSecret: string) {
     const body = {
       bar: bar,

@@ -29,7 +29,7 @@ export class MusicService {
     return this.http.delete(`${this.baseUrl}/delete-song/${id}?email=${email}`);
   }
 
-  // --- CONTROL DEL REPRODUCTOR (Sección 4.1) ---
+  // CONTROL DEL REPRODUCTOR  
   getDevices(email: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/devices?email=${email}`);
   }
@@ -54,18 +54,18 @@ export class MusicService {
     return this.http.get(`${this.baseUrl}/playback-state?email=${email}`);
   }
 
-  // --- INSERCIÓN TRAS PAGO VERIFICADO (Requisito 4.6) ---
+  // INSERCIÓN TRAS PAGO VERIFICADO 
   addSongPaid(email: string, paymentIntentId: string, songData: any): Observable<any> {
     const body = { email, paymentIntentId, songData };
     return this.http.post(`${this.baseUrl}/add-paid`, body);
   }
 
-  // --- Limpieza masiva de la cola (admin) ---
+  // Limpieza masiva de la cola (admin) 
   clearQueue(email: string): Observable<any> {
     return this.http.delete(`${this.baseUrl}/clear-queue?email=${email}`);
   }
 
-  // --- SINCRONIZACIÓN CON COLA REAL DE SPOTIFY ---
+  // SINCRONIZACIÓN CON COLA REAL DE SPOTIFY 
   getSpotifyQueue(email: string): Observable<any> {
     return this.http.get(`${this.baseUrl}/spotify-queue?email=${email}`);
   }
@@ -75,7 +75,7 @@ export class MusicService {
   }
 }
 
-// Tipo canónico para resultados de búsqueda (Requisito 4.5)
+// Tipo canónico para resultados de búsqueda 
 export interface TrackObject {
   id: string;
   name: string;

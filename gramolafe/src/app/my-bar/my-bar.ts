@@ -19,6 +19,7 @@ export class MyBarComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   precios: any[] = [];
   refreshInterval: any;
+  signatureImage: string | null = null;
 
   constructor(
     private userService: UserService,
@@ -36,11 +37,12 @@ export class MyBarComponent implements OnInit, OnDestroy {
       this.loadSubscriptionStatus();
       this.loadTransactions();
       this.loadPrecios();
+      this.loadSignature();
 
       // Refresco en tiempo real cada 5 segundos
       this.refreshInterval = setInterval(() => {
         this.loadSubscriptionStatus();
-        this.loadTransactions(); // Refresca el historial también
+        this.loadTransactions();
       }, 5000);
     } else {
       this.router.navigate(['/login']);
@@ -48,7 +50,6 @@ export class MyBarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Limpiar el intervalo cuando se destruye el componente
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
@@ -79,13 +80,26 @@ export class MyBarComponent implements OnInit, OnDestroy {
   }
 
   loadPrecios() {
-    this.http.get<any[]>('http://localhost:8080/precios/lista').subscribe({
+    this.http.get<any[]>('http://127.0.0.1:8080/precios/lista').subscribe({
       next: (data) => {
-        // Mostrar solo planes de suscripción para el dueño (oculta precio por canción)
-        this.precios = (data || []).filter(p => (p?.id || '').includes('SUB'));
+        // Mostrar solo planes de suscripción: excluir CANCION y excluir el precio 0.5
+        this.precios = (data || [])
+          .filter((p) => {
+            const concepto = (p?.concepto || '').toUpperCase();
+            const importe = parseFloat(p?.importe || p?.precio || 0);
+            return !concepto.includes('CANCION') && 
+                   !concepto.includes('CANCIÓN') && 
+                   importe !== 0.5;  
+          })
+          .sort((a, b) => {
+            const precioA = parseFloat(a?.importe || a?.precio || 0);
+            const precioB = parseFloat(b?.importe || b?.precio || 0);
+            return precioA - precioB;
+          });  // Ordenar de menor a mayor
       },
       error: (err) => {
         console.error('Error al cargar precios:', err);
+        this.precios = [];
       }
     });
   }
@@ -151,6 +165,19 @@ export class MyBarComponent implements OnInit, OnDestroy {
     // El backend extenderá la suscripción desde la fecha de expiración actual (si activa) o desde hoy (si expirada)
     this.router.navigate(['/payment'], {
       queryParams: { email: this.email, planId: precio.id }
+    });
+  }
+
+  loadSignature() {
+    this.userService.getSignature(this.email).subscribe({
+      next: (data: any) => {
+        if (data.signature) {
+          this.signatureImage = 'data:image/png;base64,' + data.signature;
+        }
+      },
+      error: (err) => {
+        console.log('Sin firma registrada (opcional)');
+      }
     });
   }
 }

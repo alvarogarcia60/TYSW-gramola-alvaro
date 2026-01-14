@@ -13,18 +13,34 @@
     </header>
 
     <div class="plans-selector">
-      <label class="section-label">Selecciona tu Plan de Suscripción</label>
+      <label class="section-label" *ngIf="!songData">Selecciona tu Plan de Suscripción</label>
+      <label class="section-label" *ngIf="songData">Añadir Canción a la Cola</label>
       <div class="plans-grid">
-        <div *ngFor="let plan of listaPrecios" 
-             class="plan-option" 
-             [class.active]="planSeleccionado?.id === plan.id"
-             (click)="seleccionarPlan(plan)">
-          <div class="plan-info">
-            <span class="plan-name">{{ plan.nombre }}</span>
-            <span class="plan-desc">{{ plan.descripcion }}</span>
+        <!-- Mostrar solo la opción de canción si hay una pendiente -->
+        <ng-container *ngIf="songData">
+          <div class="plan-option active"
+               [class.active]="true">
+            <div class="plan-info">
+              <span class="plan-name">{{ planSeleccionado?.nombre }}</span>
+              <span class="plan-desc">{{ planSeleccionado?.descripcion }}</span>
+            </div>
+            <span class="plan-price">{{ planSeleccionado?.importe }}€</span>
           </div>
-          <span class="plan-price">{{ plan.importe }}€</span>
-        </div>
+        </ng-container>
+        
+        <!-- Mostrar planes de suscripción si no hay canción pendiente -->
+        <ng-container *ngIf="!songData">
+          <div *ngFor="let plan of listaPrecios" 
+               class="plan-option" 
+               [class.active]="planSeleccionado?.id === plan.id"
+               (click)="seleccionarPlan(plan)">
+            <div class="plan-info">
+              <span class="plan-name">{{ plan.nombre }}</span>
+              <span class="plan-desc">{{ plan.descripcion }}</span>
+            </div>
+            <span class="plan-price">{{ plan.importe }}€</span>
+          </div>
+        </ng-container>
       </div>
     </div>
 

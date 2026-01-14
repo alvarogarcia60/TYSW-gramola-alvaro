@@ -90,3 +90,56 @@ input {
 }
 
 hr { margin: 1.5rem 0; border: 0; border-top: 1px solid #eee; }
+
+/* Diseño responsive */
+@media (max-width: 768px) {
+    .login-page {
+        padding: 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        padding: 1.5rem;
+        max-width: 100%;
+        border-radius: 12px;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.2rem;
+    }
+
+    input {
+        padding: 14px;
+        font-size: 16px; /* Evita zoom en iOS */
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px;
+        font-size: 1rem;
+    }
+
+    .link-button {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 1.2rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.8rem;
+    }
+
+    input {
+        padding: 12px;
+    }
+}

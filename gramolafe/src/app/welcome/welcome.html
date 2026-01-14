@@ -1,5 +1,132 @@
-<div class="welcome-container">
-  <h1>Bienvenido a La Gramola</h1>
-  <p>La mejor plataforma para gestionar la música de tu bar.</p>
-  <button (click)="goToLogin()">Entrar a mi cuenta</button>
+<div class="welcome-page">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="logo-container">
+        <div class="logo-icon">🎵</div>
+        <h1>La Gramola</h1>
+      </div>
+      <p class="tagline">La mejor plataforma para gestionar la música de tu bar</p>
+      
+      <div class="cta-buttons">
+        <button class="btn-primary" (click)="goToLogin()">Entrar a mi cuenta</button>
+        <button class="btn-secondary" (click)="goToRegister()">Registrarse</button>
+      </div>
+
+      <!-- Scroll Indicator -->
+      <div class="scroll-indicator">
+        <span>Desplázate para más</span>
+        <div class="scroll-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Bares Conectados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">2.5M+</div>
+        <div class="stat-label">Canciones Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">10M+</div>
+        <div class="stat-label">Canciones Reproducidas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">99.9%</div>
+        <div class="stat-label">Disponibilidad</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2>¿Por qué elegir La Gramola?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎧</div>
+        <h3>Jukebox Online</h3>
+        <p>Tus clientes pueden pedir canciones en tiempo real desde sus dispositivos</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Estadísticas</h3>
+        <p>Controla qué canciones son las favoritas y las tendencias musicales</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <h3>Pagos Seguros</h3>
+        <p>Sistema de pago integrado con Stripe para máxima seguridad</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">🎵</div>
+        <h3>Spotify Integration</h3>
+        <p>Acceso a millones de canciones de Spotify directamente</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>100% Responsive</h3>
+        <p>Funciona perfecto en móvil, tablet y desktop</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Rápido y Fácil</h3>
+        <p>Interfaz intuitiva, sin complicaciones innecesarias</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <h2>¿Cómo Funciona?</h2>
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-icon">📝</div>
+        <h3>Regístrate</h3>
+        <p>Crea tu cuenta en menos de 2 minutos. Solo necesitas tu email y contraseña.</p>
+        <div class="step-line"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-icon">🎵</div>
+        <h3>Configura tu Música</h3>
+        <p>Conecta Spotify y personaliza la experiencia musical de tu bar en segundos.</p>
+        <div class="step-line"></div>
+      </div>
+
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-icon">🚀</div>
+        <h3>¡Listo!</h3>
+        <p>Tus clientes pueden empezar a pedir canciones. Tú controlas todo desde el dashboard.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="final-cta">
+    <h2>¿Listo para revolucionar tu bar?</h2>
+    <p>Únete a cientos de bares que ya confían en La Gramola</p>
+    <button class="btn-large" (click)="goToRegister()">Comenzar Ahora</button>
+  </section>
+
+  <!-- Footer -->
+  <footer class="welcome-footer">
+    <p>&copy; 2026 La Gramola. Todos los derechos reservados.</p>
+  </footer>
 </div>

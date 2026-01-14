@@ -205,3 +205,139 @@
     margin: 6px 0;
     font-size: 0.75rem;
 }
+
+/* Diseño Responsive */
+@media (max-width: 768px) {
+    .payment-container {
+        padding: 40px 15px;
+    }
+
+    .payment-card {
+        padding: 30px 20px;
+        border-radius: 20px;
+        max-width: 100%;
+    }
+
+    .secure-badge {
+        font-size: 0.65rem;
+        padding: 6px 14px;
+        top: -15px;
+    }
+
+    .payment-header h2 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .bar-tag {
+        padding: 6px 14px;
+        margin-bottom: 25px;
+    }
+
+    .bar-email {
+        font-size: 0.8rem;
+    }
+
+    /* Grid de planes a 1 columna en móvil */
+    .plans-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 30px;
+    }
+
+    .plan-option {
+        padding: 18px;
+    }
+
+    .plan-name {
+        font-size: 0.95rem;
+    }
+
+    .plan-desc {
+        font-size: 0.75rem;
+    }
+
+    .plan-price {
+        font-size: 1.3rem;
+        margin-top: 12px;
+    }
+
+    #card-element-container {
+        padding: 14px;
+    }
+
+    .confirm-btn {
+        padding: 16px;
+        font-size: 1rem;
+        margin-top: 30px;
+    }
+
+    .status-alert {
+        padding: 12px;
+        font-size: 0.85rem;
+    }
+
+    .payment-footer {
+        margin-top: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .payment-container {
+        padding: 30px 12px;
+    }
+
+    .payment-card {
+        padding: 25px 15px;
+        border-radius: 16px;
+    }
+
+    .secure-badge {
+        font-size: 0.6rem;
+        padding: 5px 12px;
+    }
+
+    .payment-header h2 {
+        font-size: 1.3rem;
+    }
+
+    .section-label {
+        font-size: 0.8rem;
+        margin-bottom: 12px;
+    }
+
+    .plan-option {
+        padding: 15px;
+    }
+
+    .plan-name {
+        font-size: 0.9rem;
+    }
+
+    .plan-price {
+        font-size: 1.2rem;
+    }
+
+    .confirm-btn {
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+
+    .payment-footer p {
+        font-size: 0.7rem;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .plan-option {
+        min-height: 44px;
+    }
+
+    .confirm-btn {
+        min-height: 48px;
+    }
+
+    .plan-option:active {
+        transform: scale(0.98);
+    }
+}
