@@ -42,6 +42,18 @@ public class User {
 
     private boolean playing;
 
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Column(name = "signature", columnDefinition = "LONGBLOB")
+    private byte[] signature;
+
     @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JoinColumn(name = "creation_token_id", referencedColumnName = "id")
@@ -76,6 +88,18 @@ public class User {
 
     public boolean isPlaying() { return playing; }
     public void setPlaying(boolean playing) { this.playing = playing; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public byte[] getSignature() { return signature; }
+    public void setSignature(byte[] signature) { this.signature = signature; }
 
     public Token getCreationToken() { return creationToken; }
     public void setCreationToken(Token creationToken) { this.creationToken = creationToken; }

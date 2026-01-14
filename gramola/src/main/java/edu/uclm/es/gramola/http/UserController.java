@@ -30,7 +30,7 @@ public class UserController {
     @PostMapping("/register")
     public void register(@RequestBody Map<String, String> body) {
         service.register(body.get("bar"), body.get("email"), body.get("pwd1"), 
-                         body.get("clientId"), body.get("clientSecret"));
+                         body.get("clientId"), body.get("clientSecret"), body.get("address"), body.get("signature"));
     }
 
     @GetMapping("/confirmToken/{email}")
@@ -142,5 +142,39 @@ public class UserController {
     @PostMapping("/renew-subscription")
     public ResponseEntity<Map<String, Object>> renewSubscription(@RequestParam String email, @RequestParam(defaultValue = "monthly") String plan) {
         return ResponseEntity.ok(service.renewSubscription(email, plan));
+    }
+
+    @GetMapping("/bar-location/{email}")
+    public ResponseEntity<Map<String, Object>> getBarLocation(@PathVariable String email) {
+        User user = userRepo.findById(email).orElse(null);
+        Map<String, Object> response = new java.util.HashMap<>();
+        
+        if (user != null && user.getLatitude() != null && user.getLongitude() != null) {
+            response.put("email", email);
+            response.put("bar", user.getBar());
+            response.put("latitude", user.getLatitude());
+            response.put("longitude", user.getLongitude());
+            response.put("address", user.getAddress());
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("error", "Ubicación del bar no disponible");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @GetMapping("/signature/{email}")
+    public ResponseEntity<Map<String, Object>> getSignature(@PathVariable String email) {
+        User user = userRepo.findById(email).orElse(null);
+        Map<String, Object> response = new java.util.HashMap<>();
+        
+        if (user != null && user.getSignature() != null && user.getSignature().length > 0) {
+            String signatureBase64 = java.util.Base64.getEncoder().encodeToString(user.getSignature());
+            response.put("email", email);
+            response.put("signature", signatureBase64);
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("error", "Firma no disponible");
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }

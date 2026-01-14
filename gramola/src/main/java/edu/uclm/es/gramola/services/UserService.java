@@ -37,7 +37,7 @@ public class UserService {
     @Autowired private RestTemplate restTemplate;
 
     // REGISTRO: Crea usuario y envía email con token (Figura 13, Paso 7)
-    public void register(String bar, String email, String pwd, String clientId, String clientSecret) {
+    public void register(String bar, String email, String pwd, String clientId, String clientSecret, String address, String signatureBase64) {
         userRepo.deleteById(Objects.requireNonNull(email, "El email no puede ser null"));
 
         User user = new User();
@@ -50,6 +50,28 @@ public class UserService {
         
         user.setClientId(clientId);
         user.setClientSecret(clientSecret);
+        user.setAddress(address);
+        
+        // Obtener coordenadas desde Nominatim si se proporciona dirección
+        if (address != null && !address.isEmpty()) {
+            Map<String, Object> coords = getCoordinatesFromAddress(address);
+            if (coords != null) {
+                user.setLatitude((Double) coords.get("latitude"));
+                user.setLongitude((Double) coords.get("longitude"));
+                System.out.println("✅ Coordenadas obtenidas para " + bar + ": " + coords.get("latitude") + ", " + coords.get("longitude"));
+            }
+        }
+        
+        // Guardar firma si se proporciona (solo para bars)
+        if (signatureBase64 != null && !signatureBase64.isEmpty()) {
+            try {
+                byte[] signatureBytes = Base64.getDecoder().decode(signatureBase64);
+                user.setSignature(signatureBytes);
+                System.out.println("✅ Firma guardada para " + bar);
+            } catch (IllegalArgumentException e) {
+                System.err.println("⚠️ Error decodificando firma Base64: " + e.getMessage());
+            }
+        }
         
         user.setPaid(false);
         user.setExpirationDate(0L); 
@@ -64,6 +86,30 @@ public class UserService {
         userRepo.save(user); 
 
         sendEmail(email, token.getId());
+    }
+
+    // Obtener coordenadas desde Nominatim (OpenStreetMap)
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> getCoordinatesFromAddress(String address) {
+        try {
+            String url = "https://nominatim.openstreetmap.org/search?q=" + 
+                        java.net.URLEncoder.encode(address, "UTF-8") + 
+                        "&format=json&limit=1";
+            
+            ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+            List<Map<String, Object>> results = response.getBody();
+            
+            if (results != null && !results.isEmpty()) {
+                Map<String, Object> result = results.get(0);
+                Map<String, Object> coords = new java.util.HashMap<>();
+                coords.put("latitude", Double.parseDouble(result.get("lat").toString()));
+                coords.put("longitude", Double.parseDouble(result.get("lon").toString()));
+                return coords;
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Error obteniendo coordenadas de Nominatim: " + e.getMessage());
+        }
+        return null;
     }
 
     private void sendEmail(String email, String tokenId) {
