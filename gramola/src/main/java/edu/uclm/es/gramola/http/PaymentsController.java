@@ -34,7 +34,6 @@ public class PaymentsController {
     public String prepay(@RequestBody Map<String, Object> request) throws Exception {
         String email = (String) request.get("email");
 
-        // Acepta montos con decimales y convierte a céntimos para Stripe
         BigDecimal rawAmount = new BigDecimal(request.get("amount").toString());
         long amountInCents = rawAmount.multiply(BigDecimal.valueOf(100))
                 .setScale(0, RoundingMode.HALF_UP)

@@ -12,7 +12,7 @@ public interface PlaylistDao extends CrudRepository<Playlist, Long> {
     // Método principal: Ordenar por queuePosition es vital para la lógica de "colarse"
     List<Playlist> findByBarEmailOrderByQueuePositionAsc(String barEmail);
     
-    // Método alternativo sin orden (por compatibilidad si se necesita)
+    // Método alternativo sin orden 
     List<Playlist> findByBarEmail(String barEmail);
 
     // Borrado masivo por bar

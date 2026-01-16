@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
@@ -36,18 +37,14 @@ public class UserService {
     @Autowired private MusicService musicService;
     @Autowired private RestTemplate restTemplate;
 
-    // REGISTRO: Crea usuario y envía email con token (Figura 13, Paso 7)
+    // REGISTRO: Crea usuario y envía email con token 
     public void register(String bar, String email, String pwd, String clientId, String clientSecret, String address, String signatureBase64) {
         userRepo.deleteById(Objects.requireNonNull(email, "El email no puede ser null"));
 
         User user = new User();
         user.setEmail(email);
         user.setBar(bar);
-        
-        // CORRECCIÓN: Pasa 'pwd' directamente. 
-        // El setter de User.java ya se encarga de llamar a encryptPassword.
         user.setPwd(pwd); 
-        
         user.setClientId(clientId);
         user.setClientSecret(clientSecret);
         user.setAddress(address);
@@ -62,7 +59,7 @@ public class UserService {
             }
         }
         
-        // Guardar firma si se proporciona (solo para bars)
+        // Guardar firma si se proporciona (solo para bares)
         if (signatureBase64 != null && !signatureBase64.isEmpty()) {
             try {
                 byte[] signatureBytes = Base64.getDecoder().decode(signatureBase64);
@@ -92,19 +89,30 @@ public class UserService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> getCoordinatesFromAddress(String address) {
         try {
-            String url = "https://nominatim.openstreetmap.org/search?q=" + 
-                        java.net.URLEncoder.encode(address, "UTF-8") + 
-                        "&format=json&limit=1";
-            
-            ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+            String url = "https://nominatim.openstreetmap.org/search?q=" +
+                         java.net.URLEncoder.encode(address, "UTF-8") +
+                         "&format=json&limit=1";
+
+            // Nominatim requiere un User-Agent identificable
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("User-Agent", "GramolaApp/1.0 (algarcimartinez@gmail.com)");
+            headers.add("Accept-Language", "es");
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            // Usar RestTemplate local si no está inyectado
+            RestTemplate rt = (this.restTemplate != null) ? this.restTemplate : new RestTemplate();
+
+            ResponseEntity<List> response = rt.exchange(url, HttpMethod.GET, entity, List.class);
             List<Map<String, Object>> results = response.getBody();
-            
+
             if (results != null && !results.isEmpty()) {
                 Map<String, Object> result = results.get(0);
                 Map<String, Object> coords = new java.util.HashMap<>();
-                coords.put("latitude", Double.parseDouble(result.get("lat").toString()));
-                coords.put("longitude", Double.parseDouble(result.get("lon").toString()));
+                coords.put("latitude", Double.parseDouble(String.valueOf(result.get("lat"))));
+                coords.put("longitude", Double.parseDouble(String.valueOf(result.get("lon"))));
                 return coords;
+            } else {
+                System.err.println("⚠️ Nominatim no devolvió resultados para la dirección: " + address);
             }
         } catch (Exception e) {
             System.err.println("❌ Error obteniendo coordenadas de Nominatim: " + e.getMessage());
@@ -116,7 +124,7 @@ public class UserService {
         // 1. Construimos la URL de confirmación
         String urlConfirmacion = "http://localhost:8080/users/confirmToken/" + email + "?token=" + tokenId;
 
-        // 2. LO NUEVO: Imprimir en la consola del Backend (terminal de VS Code)
+        // 2. Imprimir en la consola del Backend (terminal de VS Code)
         System.out.println("------------------------------------------------------------");
         System.out.println("📩 ENLACE DE CONFIRMACIÓN PARA: " + email);
         System.out.println(urlConfirmacion);
@@ -152,7 +160,6 @@ public class UserService {
         st.setPaymentDate(System.currentTimeMillis()); // Registrar timestamp del pago
         this.stripeRepo.save(st);
 
-        // Si el pago incluye datos de canción, va a la Rockola (Sección 4.6)
         if (data.get("songTitle") != null) {
             Map<String, Object> songMap = new java.util.HashMap<>();
             songMap.put("name", data.get("songTitle"));
@@ -160,7 +167,7 @@ public class UserService {
             songMap.put("album", java.util.Map.of("images", java.util.List.of(java.util.Map.of("url", data.get("songCover")))));
             this.musicService.addSong(songMap, email);
         } else {
-            // Si es pago de suscripción del bar (Figura 13, Paso 25)
+            // Si es pago de suscripción del bar 
             User user = userRepo.findById(email).orElse(null);
             if (user != null) {
                 // Determinar duración según plan (mensual/anual) y extender desde la fecha de expiración vigente

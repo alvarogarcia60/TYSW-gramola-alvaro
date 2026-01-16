@@ -131,7 +131,7 @@ public class MusicService {
         System.out.println("🧹 Cola borrada en BD para: " + email);
     }
 
-    @SuppressWarnings("unchecked")
+
     private void rebuildSpotifyQueue(String email, String deletedUri) {
         try {
             User user = userRepo.findById(email).orElseThrow();

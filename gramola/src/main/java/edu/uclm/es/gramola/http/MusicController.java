@@ -20,7 +20,7 @@ import edu.uclm.es.gramola.services.MusicService;
 
 @RestController
 @RequestMapping("music")
-@CrossOrigin(origins = { "http://localhost:4200", "http://127.0.0.1:4200" }) // Cambia el "*" por esto
+@CrossOrigin(origins = { "http://localhost:4200", "http://127.0.0.1:4200" }) 
 public class MusicController {
 
     @Autowired private MusicService musicService;

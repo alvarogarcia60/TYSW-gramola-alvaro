@@ -76,7 +76,7 @@ public class User {
     public String getClientSecret() { return clientSecret; }
     public void setClientSecret(String clientSecret) { this.clientSecret = clientSecret; }
 
-    // Getter y Setter para el token de Spotify (Soluciona errores de compilación)
+    // Getter y Setter para el token de Spotify 
     public String getSpotiSimpleToken() { return spotiSimpleToken; }
     public void setSpotiSimpleToken(String spotiSimpleToken) { this.spotiSimpleToken = spotiSimpleToken; }
 
